@@ -99,3 +99,17 @@ class Conn_DB:
 
     def change_password(self, user_id, password):
         return self.update('user_info', 'password', password, 'user_id={}'.format(user_id))
+
+    def add_relation(self, user_id_1, user_id_2, user_name_1 = None, user_name_2 = None):
+        if user_name_1 is None and user_name_2 is None:
+            mysql = '{}, {}'.format(user_id_1, user_id_2)
+            return self.store_into_database('relation', '(user_id1, user_id2)', mysql)
+        elif user_name_1 is None:
+            mysql = '{}, {}, \'{}\''.format(user_id_1, user_id_2, user_name_2)
+            return self.store_into_database('relation', '(user_id1, user_id2, name2)', mysql)
+        elif user_name_2 is None:
+            mysql = '{}, \'{}\', {}'.format(user_id_1, user_name_1, user_id_2)
+            return self.store_into_database('relation', '(user_id1, name1, user_id2)', mysql)
+        else:
+            mysql = '{}, \'{}\', {}, \'{}\''.format(user_id_1, user_name_1, user_id_2, user_name_2)
+            return self.store_into_database('relation', '(user_id1, name1, user_id2, name2)', mysql)
