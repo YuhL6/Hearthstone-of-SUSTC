@@ -54,6 +54,15 @@ class Conn_DB:
             print('what the hell')
             return None
 
+    def get_friend_list(self, user_id):
+        res = self.get_from_database('relation', 'user_id2', 'user_id1={}'.format(user_id))
+        res = res.append(self.get_from_database('relation', 'user_id1', 'user_id2={}'.format(user_id)))
+        return res
+
+    def get_user_info(self, user_id):
+        res = self.get_from_database('user_info', 'user_name, total_game_num, win_rate', 'user_id={}'.format(user_id))[0]
+        return res
+
     def register(self, user_id, password, name, email):
         """first check whether user id or user name already exists, if not, execute the mysql, if something wrong
         happens, means the email duplicates"""
@@ -63,45 +72,30 @@ class Conn_DB:
         if self.check_duplicate('user_info', 'user_name', 'user_name = \'{}\''.format(name)):
             # name duplicate
             return -2
-        mysql = '{}, \'{}\', \'{}\', \'{}\''.format(user_id, password, name, email)
-        if self.store_into_database('user_info', '(user_id, password, user_name, user_email)', mysql):
-            return 0
+        if email != '':
+            mysql = '{}, \'{}\', \'{}\', \'{}\''.format(user_id, password, name, email)
+            if self.store_into_database('user_info', '(user_id, password, user_name, user_email)', mysql):
+                return 0
+            else:
+                # email duplicate
+                return 1
         else:
-            # email duplicate
-            return 1
+            mysql = '{}, \'{}\', \'{}\''.format(user_id, password, name)
+            if self.store_into_database('user_info', '(user_id, password, user_name)', mysql):
+                return 0
 
     def log(self, user_id, password):
-        """mysql = "select face_id from user_information where user_id = {};".format(self.user_id)
-        try:
-            self.cursor.execute(mysql)
-            results = self.cursor.fetchall()
-            for row in results:
-                reference = row[0]
-                break
-            if reference == password:
-                return "200 successfully done"
-            else:
-                return "404 not the same person"
-        except:
-            return "405 user_id not exists\""""
         res = self.get_from_database('user_info', 'password', 'user_id = {}'.format(user_id))
-        print(res)
-        if res is None:
+        if len(res) == 0:
             # no such user_id
-            return 0
+            return -1
         reference = res[0][0]
         if reference == password:
             # change the status of the user
-            # self.update('user_info', 'status', 1, 'user_id={}'.format(user_id))
-            return 2
+            self.update('user_info', 'status', 1, 'user_id={}'.format(user_id))
+            return 0
         else:
-            return 1
+            return -2
 
-    def get_friend_list(self, user_id):
-        res = self.get_from_database('relation', 'user_id2', 'user_id1={}'.format(user_id))
-        res = res.append(self.get_from_database('relation', 'user_id1', 'user_id2={}'.format(user_id)))
-        return res
-
-    def get_user_info(self, user_id):
-        res = self.get_from_database('user_info', 'user_name, total_game_num, win_rate', 'user_id={}'.format(user_id))[0]
-        return res
+    def change_password(self, user_id, password):
+        return self.update('user_info', 'password', password, 'user_id={}'.format(user_id))

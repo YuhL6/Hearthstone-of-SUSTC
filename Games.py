@@ -1,5 +1,4 @@
 import random
-import Server
 
 
 class card:
@@ -16,7 +15,7 @@ max_room_num = 0
 
 
 class Player:
-    def __init__(self, id, socket, time, li, re):
+    def __init__(self, id, socket, time, li, res):
         """
         user log in, change the status stored in the database and get information from database
         inform all the friends, use the method broadcast of TCP server
@@ -27,7 +26,7 @@ class Player:
         # status 1 means online, 2 means in room, 3 means ready, 4 means gaming
         self._status = 1
         self.socket = socket
-        self._friends_list = re
+        self._friends_list = res
         self._room = -1
         self.last_time = time
         self._name = li[0]
@@ -47,7 +46,7 @@ class Player:
     def get_name(self):
         return self._status
 
-    def ready(self, server: Server.TCPServer):
+    '''def ready(self, server: Server.TCPServer):
         self._status = 3
         server.broadcast(self._friends_list, b'')
 
@@ -61,7 +60,7 @@ class Player:
 
     def start_game(self, server: Server.TCPServer):
         self._status = 4
-        server.broadcast(self._friends_list, b'')
+        server.broadcast(self._friends_list, b'')'''
 
 
 class Room:
@@ -119,7 +118,7 @@ class Room:
         self.player = tmp
         self.player.ready()
 
-    def delete_room(self, server):
+    '''def delete_room(self, server):
         self.owner.out_room(server)
         if self.status >= 1:
             self.player.out_room(server)
@@ -139,7 +138,7 @@ class Room:
     def end_game(self, server):
         self.field = None
         self.owner.in_room(server)
-        self.player.in_room(server)
+        self.player.in_room(server)'''
 
 
 class Field:
@@ -187,5 +186,5 @@ class Field:
         else:
             self.attacker_money += 1
 
-    def game_over(self, room: Room, server):
-        room.end_game(server)
+    '''def game_over(self, room: Room, server):
+        room.end_game(server)'''
