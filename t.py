@@ -27,4 +27,5 @@ def log_test():
 if __name__ == '__main__':
     log_test()
     while True:
-        time.sleep(1)
+        data = sock.recv(1024)
+        print(data)

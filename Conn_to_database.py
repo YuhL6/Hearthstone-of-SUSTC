@@ -55,12 +55,26 @@ class Conn_DB:
             return None
 
     def get_friend_list(self, user_id):
-        res = self.get_from_database('relation', 'user_id2', 'user_id1={}'.format(user_id))
-        res = res.append(self.get_from_database('relation', 'user_id1', 'user_id2={}'.format(user_id)))
+        global results2, results1
+        mysql = 'select a.user_id2, a.name2, b.status from (select user_id1, user_id2, name2 from relation where ' \
+                'user_id1 = {}) a join user_info b on a.user_id1 = b.user_id'.format(user_id)
+        try:
+            self.cursor.execute(mysql)
+            results1 = self.cursor.fetchall()
+        except:
+            pass
+        mysql = 'select a.user_id1, a.name1, b.status from (select user_id2, user_id1, name1 from relation where ' \
+                'user_id1 = {}) a join user_info b on a.user_id2 = b.user_id'.format(user_id)
+        try:
+            self.cursor.execute(mysql)
+            results2 = self.cursor.fetchall()
+        except:
+            pass
+        res = results1 + results2
         return res
 
     def get_user_info(self, user_id):
-        res = self.get_from_database('user_info', 'user_name, total_game_num, win_rate', 'user_id={}'.format(user_id))[0]
+        res = self.get_from_database('user_info', 'user_name, total_game_num, win_rate', 'user_id={}'.format(user_id))
         return res
 
     def register(self, user_id, password, name, email):
@@ -72,7 +86,7 @@ class Conn_DB:
         if self.check_duplicate('user_info', 'user_name', 'user_name = \'{}\''.format(name)):
             # name duplicate
             return -2
-        if email != '':
+        if email is not None:
             mysql = '{}, \'{}\', \'{}\', \'{}\''.format(user_id, password, name, email)
             if self.store_into_database('user_info', '(user_id, password, user_name, user_email)', mysql):
                 return 0
@@ -100,16 +114,5 @@ class Conn_DB:
     def change_password(self, user_id, password):
         return self.update('user_info', 'password', password, 'user_id={}'.format(user_id))
 
-    def add_relation(self, user_id_1, user_id_2, user_name_1 = None, user_name_2 = None):
-        if user_name_1 is None and user_name_2 is None:
-            mysql = '{}, {}'.format(user_id_1, user_id_2)
-            return self.store_into_database('relation', '(user_id1, user_id2)', mysql)
-        elif user_name_1 is None:
-            mysql = '{}, {}, \'{}\''.format(user_id_1, user_id_2, user_name_2)
-            return self.store_into_database('relation', '(user_id1, user_id2, name2)', mysql)
-        elif user_name_2 is None:
-            mysql = '{}, \'{}\', {}'.format(user_id_1, user_name_1, user_id_2)
-            return self.store_into_database('relation', '(user_id1, name1, user_id2)', mysql)
-        else:
-            mysql = '{}, \'{}\', {}, \'{}\''.format(user_id_1, user_name_1, user_id_2, user_name_2)
-            return self.store_into_database('relation', '(user_id1, name1, user_id2, name2)', mysql)
+    def log_out(self, user_id):
+        self.update('user_info', 'status', 0, 'user_id={}'.format(user_id))

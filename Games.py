@@ -19,6 +19,7 @@ class Player:
         """
         user log in, change the status stored in the database and get information from database
         inform all the friends, use the method broadcast of TCP server
+
         """
 
         self._id = id
@@ -31,7 +32,6 @@ class Player:
         self._name = li[0]
         self._total_game_num = li[1]
         self._win_rate = li[2]
-
 
     def get_room(self):
         return self._room
@@ -48,12 +48,15 @@ class Player:
     '''def ready(self, server: Server.TCPServer):
         self._status = 3
         server.broadcast(self._friends_list, b'')
+
     def in_room(self, server: Server.TCPServer):
         self._status = 2
         server.broadcast(self._friends_list, b'')
+
     def out_room(self, server: Server.TCPServer):
         self._status = 1
         server.broadcast(self._friends_list, b'')
+
     def start_game(self, server: Server.TCPServer):
         self._status = 4
         server.broadcast(self._friends_list, b'')'''
@@ -64,6 +67,7 @@ class Room:
         """
         status: 0 means empty, 1 means full, 2 means ready, 3 means gaming
         if the owner set password, any one who wants to add into the room needs to enter the password
+
         """
         self.id = id
         self.owner = owner
@@ -119,6 +123,7 @@ class Room:
             self.player.out_room(server)
         id = self.id
         return id
+
     def delete_owner(self, server):
         if self.status < 1:
             self.delete_room(server)
@@ -128,6 +133,7 @@ class Room:
         self.owner = self.player
         self.player = None
         return 0
+
     def end_game(self, server):
         self.field = None
         self.owner.in_room(server)

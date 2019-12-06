@@ -56,7 +56,7 @@ table: relation
 >
 > "200 time_stamp\r\n"
 >
-> "User_id User_passport\r\n"
+> "User_id password\r\n"
 >
 > "User_name\r\n"
 >
