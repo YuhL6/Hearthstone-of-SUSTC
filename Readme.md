@@ -30,9 +30,9 @@ table: relation
 | Field    | Type        | Null | Key  | Default | Extra      |
 | -------- | ----------- | ---- | ---- | ------- | ---------- |
 | cnt      | int(11)     | NO   | PRI  | NULL    | auto_extra |
-| user_id1 | int(8)      | NO   |      | NULL    |            |
+| user_id1 | int(8)      | NO   | fr1  | NULL    |            |
 | name1    | varchar(10) | YES  |      | NULL    |            |
-| user_id2 | int(8)      | NO   |      | NULL    |            |
+| user_id2 | int(8)      | NO   | fr2  | NULL    |            |
 | name2    | varchar(10) | YES  |      | NULL    |            |
 
 
@@ -104,13 +104,25 @@ table: relation
 >
 > "212 time_stamp\r\n"
 >
-> "OTHER_MESSAGE\r\n"
+> "User_name Total_game_number Win_rate\r\n"
+>
+> #FRIENDS_LIST
+>
+> "Friends_number\r\n"
+>
+> "Friend_name Memo(select)\r\n"
+>
+> #REPEAT
+>
+> #RELATION_REQUEST
+>
+> "Name\r\n"
+>
+> #REPEAT
 >
 > "\r\n"
 
 **Note**: information are split by space ' ' and end with '/r/n'
-
-​		  OTHER_MESSAGE包含用户信息，按顺序带有如下附件：<u>在线好友列表</u>、<u>用户战绩信息</u>、<u>排位信息</u>。其中在线好友列表格式为：<u>好友名</u>、<u>备注</u>（如存在），战绩信息格式为：<u>总场数</u>、<u>胜率</u>，排位信息格式为：<u>Rank分</u>、<u>用户昵称</u>、<u>用户胜率</u>。2
 
 
 
@@ -122,13 +134,27 @@ table: relation
 
 > **通过旧密码修改密码**格式：
 >
-> "220 time_stamp/r/n"
+> "220 Time_stamp\r\n"
 >
-> "User_id old_password/r/n"
+> "User_id old_password\r\n"
 >
-> "New_password/r/n"
+> "New_password\r\n"
 >
-> "/r/n"
+> "\r\n"
+>
+> **修改密码**成功：
+>
+> "221 Time_stamp\r\n"
+>
+> "\r\n"
+>
+> **修改密码**失败：
+>
+> "222 Time_stamp\r\n"
+>
+> "REASON\r\n"
+>
+> "\r\n"
 
 
 
@@ -160,6 +186,10 @@ table: relation
 
 
 
+**Note**: 除了登录系统使用User_id，其他所有的user_id都使用user_name。
+
+
+
 #### 用户系统
 
 ###### 购买卡包
@@ -168,7 +198,7 @@ table: relation
 >
 > "300 time_stamp/r/n"
 >
-> "User_id/r/n"
+> "User_name/r/n"
 >
 > "/r/n"
 
@@ -182,7 +212,7 @@ table: relation
 >
 > "305 time_stamp/r/n"
 >
-> "User_id/r/n"
+> "User_name/r/n"
 >
 > **错误信息**格式:
 >
@@ -206,7 +236,7 @@ table: relation
 >
 > "310 time_stamp/r/n"
 >
-> "User_id/r/n"
+> "User_name/r/n"
 >
 > "/r/n"
 >
@@ -234,7 +264,7 @@ table: relation
 >
 > "315 time_stamp /r/n"
 >
-> "User_id list_name/r/n"
+> "User_name list_name/r/n"
 >
 > **错误信息**格式:
 >
@@ -256,7 +286,7 @@ table: relation
 >
 > "320 time_stamp /r/n"
 >
-> "User_id list_name/r/n"
+> "User_name list_name/r/n"
 >
 
 
@@ -267,7 +297,7 @@ table: relation
 >
 > "325 time_stamp /r/n"
 >
-> "User_id list_name/r/n"
+> "User_name list_name/r/n"
 >
 > **错误信息**格式:
 >
@@ -289,7 +319,7 @@ table: relation
 >
 > "330 time_stamp/r/n"
 >
-> "User_id list_number/r/n"
+> "User_name list_number/r/n"
 >
 
 
@@ -300,7 +330,7 @@ table: relation
 >
 > "340 time_stamp/r/n"
 >
-> "User_id list_name/r/n"
+> "User_name list_name/r/n"
 >
 > "card_number/r/n"
 
@@ -312,19 +342,19 @@ table: relation
 >
 > "350 time_stamp/r/n"
 >
-> "User_id/r/n"
+> "User_name/r/n"
 >
 > **没有房间**格式:
 >
 > "351 time_stamp/r/n"
 >
-> "User_id REASON/r/n"
+> "User_name REASON/r/n"
 >
 > **有房间**格式:
 >
 > "352 time_stamp/r/n"
 >
-> "User_id rooms_information/r/n"
+> "User_name rooms_information/r/n"
 
 
 
@@ -334,7 +364,7 @@ table: relation
 >
 > "360 time_stamp /r/n"
 >
-> "User_id /r/n"
+> "User_name /r/n"
 >
 
 
@@ -345,19 +375,19 @@ table: relation
 >
 > "370 time_stamp/r/n"
 >
-> "User_id room_number/r/n"
+> "User_name room_number/r/n"
 >
 > **加入失败**格式：
 >
 > "371 time_stamp/r/n"
 >
-> "User_id reason/r/n"
+> "User_name reason/r/n"
 >
 > **加入成功**格式：
 >
 > "372 time_stamp/r/n"
 >
-> "User_id/r/n"
+> "User_name/r/n"
 
 
 
@@ -367,7 +397,7 @@ table: relation
 >
 > "380 time_stamp/r/n"
 >
-> "User_id/r/n"
+> "User_name/r/n"
 >
 
 
@@ -378,19 +408,19 @@ table: relation
 >
 > "390 time_stamp/r/n"
 >
-> "User_id/r/n"
+> "User_name/r/n"
 >
 > **开始失败**格式：
 >
 > "391 time_stamp/r/n"
 >
-> "User_id reason/r/n"
+> "User_name reason/r/n"
 >
 > **开始成功**格式：
 >
 > "392 time_stamp/r/n"
 >
-> "User_id/r/n"
+> "User_name/r/n"
 
 
 
@@ -400,7 +430,7 @@ table: relation
 >
 > "395 time_stamp/r/n"
 >
-> "User_id /r/n"
+> "User_name/r/n"
 >
 
 
@@ -409,25 +439,87 @@ table: relation
 
 ###### 请求好友
 
-添加好友支持通过**用户账号**及**用户昵称**添加，由客户端判断Receiver是账号(int, 400)还是昵称(String, 405)，发送请求前客户端需要判断是否已经添加为好友，发送后服务器将再进行一次判断。
+添加好友支持通过**用户账号**及**用户昵称**添加，发送请求前客户端需要判断是否已经添加为好友，发送后服务器将再进行一次判断。如已经添加、用户不存在或是对方拒绝，则返还**添加失败**，没有返还失败信息则表示**请求成功**，服务器将发送**请求好友**给接收方。
 
-> **请求好友**格式：
+可以添加离线用户，当用户上线时会受到添加请求。
+
+> **请求好友**格式（客户端）：
 >
-> "400 time_stamp /r/n"
+> "400 Time_stamp\r\n"
 >
-> "User_id Receiver_name/r/n"
+> "User_name Receiver_name(or id)/r/n"
 >
+> "\r\n"
+>
+> **请求好友**（服务器端）：
+>
+> "400 Time-stamp\r\n"
+>
+> "Sender_name(or id)\r\n"
+>
+> "\r\n"
+>
+> **添加失败**格式：
+>
+> "401 Time_stamp\r\n"
+>
+> "Name(or id)\r\n"
+>
+> "REASON\r\n"
+>
+> "\r\n"
+>
+> **添加成功**格式：
+>
+> "402 Time_stamp\r\n"
+>
+> "Name(or id)\r\n"
+>
+> "\r\n"
 
 
 
 ###### 接受好友请求
 
+当用户接受好友请求时，服务器将判断该请求是否存在，如存在则返还**添加成功**，失败则返还原因
+
 > **接受好友申请**格式：
 >
-> "410 time_stamp /r/n"
+> "410 Time_stamp\r\n"
 >
-> "User_id Sender_name/r/n"
+> "User_name Sender_name(or id)\r\n"
 >
+> "\r\n"
+>
+> **接受好友请求失败**格式：
+>
+> "411 Time_stamp\r\n"
+>
+> "Name(or id)\r\n"
+>
+> "REASON\r\n"
+>
+> "\r\n"
+
+###### 拒绝好友请求
+
+> **拒绝好友申请**格式：
+>
+> "415 Time_stamp\r\n"
+>
+> "User_name Sender_name(or id)\r\n"
+>
+> "\r\n"
+>
+> **拒绝好友请求失败**格式：
+>
+> "416 Time_stamp\r\n"
+>
+> "Name(or id)\r\n"
+>
+> "REASON\r\n"
+>
+> "\r\n"
 
 
 
@@ -437,12 +529,23 @@ table: relation
 
 > **发送消息**格式：
 >
-> "420 time_stamp/r/n"
+> "420 Time_stamp\r\n"
 >
-> "sender_id receiver_name/r/n"
+> "User_name receiver_name\r\n"
 >
-> "messages/r/n"
+> "messages\r\n"
 >
+> "\r\n"
+>
+> **发送失败**格式：
+>
+> "421 Time-stamp\r\n"
+>
+> "Name\r\n"
+>
+> "REASON\r\n"
+>
+> "\r\n"
 
 
 
@@ -450,10 +553,21 @@ table: relation
 
 > **删除好友**格式：
 >
-> "430 time_stamp /r/n"
+> "430 Time_stamp\r\n"
 >
-> "operator_id be_deleted_name /r/n"
+> "User_name be_deleted_name\r\n"
 >
+> "\r\n"
+>
+> **删除失败**格式:
+>
+> "431 Time_stamp\r\n"
+>
+> "Name\r\n"
+>
+> "REASON\r\n"
+>
+> "\r\n"
 
 
 
