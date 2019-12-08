@@ -334,7 +334,7 @@ table: relation
 >
 > "340 time_stamp/r/n"
 >
-> "User_name list_name/r/n"
+> "User_id list_name/r/n"
 >
 > "card_number/r/n"
 
@@ -344,32 +344,47 @@ table: relation
 
 > **列出房间**格式：
 >
-> "350 time_stamp/r/n"
+> "350 Time_stamp\r\n"
 >
-> "User_name/r/n"
+> "User_id\r\n"
 >
-> **没有房间**格式:
+> "\r\n"
 >
-> "351 time_stamp/r/n"
+> **房间**格式:
 >
-> "User_name REASON/r/n"
+> "352 Time_stamp\r\n"
 >
-> **有房间**格式:
+> "ROOM_NUMBER\r\n"
 >
-> "352 time_stamp/r/n"
+> "Room_id Room_status Room_owner Room_attacker/r/n"
 >
-> "User_name rooms_information/r/n"
-
-
+> "\r\n"
 
 ###### 创建房间
 
 > **创建房间**格式：
 >
-> "360 time_stamp /r/n"
+> "360 Time_stamp\r\n"
 >
-> "User_name /r/n"
+> "User_id\r\n"
 >
+> "\r\n"
+>
+> **创建房间失败**格式：
+>
+> "361 Time_stamp\r\n"
+>
+> "REASON\r\n"
+>
+> "\r\n"
+>
+> **创建房间成功**格式：
+>
+> "362 Time_stamp\r\n"
+>
+> "Room_id\r\n"
+>
+> "\r\n"
 
 
 
@@ -377,21 +392,27 @@ table: relation
 
 > **加入房间**格式：
 >
-> "370 time_stamp/r/n"
+> "370 Time_stamp\r\n"
 >
-> "User_name room_number/r/n"
+> "User_id room_number\r\n"
+>
+> "\r\n"
 >
 > **加入失败**格式：
 >
-> "371 time_stamp/r/n"
+> "371 Time_stamp\r\n"
 >
-> "User_name reason/r/n"
+> "Room_id REASON\r\n"
+>
+> "\r\n"
 >
 > **加入成功**格式：
 >
-> "372 time_stamp/r/n"
+> "372 Time_stamp\r\n"
 >
-> "User_name/r/n"
+> "Room_id\r\n"
+>
+> "\r\n"
 
 
 
@@ -399,10 +420,29 @@ table: relation
 
 > **准备游戏**格式：
 >
-> "380 time_stamp/r/n"
+> "380 Time_stamp\r\n"
 >
-> "User_name/r/n"
+> "User_id Room_number\r\n"
 >
+> "\r\n"
+>
+> **准备游戏失败**格式：
+>
+> "381 Time_stamp\r\n"
+>
+> "Room_number\r\n"
+>
+> "REASON\r\n"
+>
+> "\r\n"
+>
+> **准备游戏成功**格式：
+>
+> "382 Time_stamp\r\n"
+>
+> "Room_number\r\n"
+>
+> "\r\n"
 
 
 
@@ -451,7 +491,7 @@ table: relation
 >
 > "400 Time_stamp\r\n"
 >
-> "User_name Receiver_name(or id)/r/n"
+> "User_id Receiver_name(or id)/r/n"
 >
 > "\r\n"
 >
@@ -504,6 +544,14 @@ table: relation
 > "REASON\r\n"
 >
 > "\r\n"
+>
+> **接受好友请求成功**格式：
+>
+> "412 Time_stamp\r\n"
+>
+> "Name(or id)\r\n"
+>
+> "\r\n"
 
 ###### 拒绝好友请求
 
@@ -513,7 +561,7 @@ table: relation
 >
 > "415 Time_stamp\r\n"
 >
-> "User_name Sender_name(or id)\r\n"
+> "User_id Sender_name(or id)\r\n"
 >
 > "\r\n"
 >
@@ -537,7 +585,7 @@ table: relation
 >
 > "420 Time_stamp\r\n"
 >
-> "User_name receiver_name\r\n"
+> "User_id receiver_name\r\n"
 >
 > "messages\r\n"
 >
@@ -571,7 +619,7 @@ table: relation
 >
 > "430 Time_stamp\r\n"
 >
-> "User_name be_deleted_name\r\n"
+> "User_id be_deleted_name\r\n"
 >
 > "\r\n"
 >
@@ -602,16 +650,6 @@ table: relation
 > "\r\n"
 
 
-
-**Method Code**：							**Meaning:**
-
-**400**												   **请求好友**
-
-410													接受好友
-
-420                                                   发送信息
-
-430                                                   删除好友
 
 #### 对战系统
 
@@ -652,6 +690,148 @@ table: relation
 540													增加金币
 
 
+
+#### 消息推送
+
+服务器主动向用户发送消息推送
+
+###### 好友登录/退出推送
+
+> **好友上线**提示格式：
+>
+> "100 Time_stamp\r\n"
+>
+> "Friend_name\r\n"
+>
+> "\r\n"
+>
+> **好友下线**提示格式：
+>
+> "101 Time_stamp\r\n"
+>
+> "Friend_name\r\n"
+>
+> "\r\n"
+
+###### 好友状态改变推送（好友视角）
+
+> **好友进入房间**提示格式：
+>
+> "102 Time_stamp\r\n"
+>
+> "Friend_name\r\n"
+>
+> "\r\n"
+>
+> **好友退出房间**提示格式：
+>
+> "103 Time_stamp\r\n"
+>
+> "Friend_name\r\n"
+>
+> "\r\n"
+>
+> **好友进入游戏**提示格式：
+>
+> "104 Time_stamp\r\n"
+>
+> "Friend_name\r\n"
+>
+> "\r\n"
+>
+> **好友退出游戏**提示格式：
+>
+> "105 Time_stamp\r\n"
+>
+> "Friend_name\r\n"
+>
+> "\r\n"
+
+###### 新增房间/减少房间
+
+> **新增房间**格式：
+>
+> "106 Time_stamp\r\n"
+>
+> "Room_id  Room_owner\r\n"
+>
+> "\r\n"
+>
+> **房间减少**格式：
+>
+> "107 Time_stamp\r\n"
+>
+> "Room_id\r\n"
+>
+> "\r\n"
+
+###### 房间状态改变（外部视角）
+
+> **玩家加入房间**格式：
+>
+> "108 Time_stamp\r\n"
+>
+> "Room_id\r\n"
+>
+> "\r\n"
+>
+> **玩家退出房间**格式：
+>
+> "109 Time_stamp\r\n"
+>
+> "Room_id\r\n"
+>
+> "\r\n"
+>
+> **房间开始游戏**格式：
+>
+> "110 Time_stamp\r\n"
+>
+> "Room_id\r\n"
+>
+> "\r\n"
+>
+> **房间结束游戏**格式：
+>
+> "111 Time_stamp\r\n"
+>
+> "Room_id\r\n"
+>
+> "\r\n"
+
+###### 房间状态改变（房主视角）
+
+> **玩家加入房间**格式：
+>
+> "112 Time_stamp\r\n"
+>
+> "Room_id Name\r\n"
+>
+> "\r\n"
+>
+> **玩家退出房间**格式：
+>
+> "113 Time_stamp\r\n"
+>
+> "Room_id\r\n"
+>
+> "\r\n"
+>
+> **玩家准备**格式：
+>
+> "114 Time_stamp\r\n"
+>
+> "Room_id\r\n"
+>
+> "\r\n"
+>
+> **玩家取消准备**格式
+>
+> "115 Time_stamp\r\n"
+>
+> "Room_id\r\n"
+>
+> "\r\n"
 
 #### 协议
 
