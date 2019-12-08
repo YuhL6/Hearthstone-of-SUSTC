@@ -60,6 +60,8 @@ table: relation
 >
 > "User_name\r\n"
 >
+> "Email\r\n"
+>
 > "\r\n"
 >
 > **注册拒绝信息**格式：
@@ -103,6 +105,8 @@ table: relation
 > **登录许可信息**格式:
 >
 > "212 time_stamp\r\n"
+>
+> #User_information
 >
 > "User_name Total_game_number Win_rate\r\n"
 >
@@ -487,7 +491,7 @@ table: relation
 >
 > "410 Time_stamp\r\n"
 >
-> "User_name Sender_name(or id)\r\n"
+> "User_id Sender_name(or id)\r\n"
 >
 > "\r\n"
 >
@@ -502,6 +506,8 @@ table: relation
 > "\r\n"
 
 ###### 拒绝好友请求
+
+如果拒绝好友失败（例如没有请求或用户不存在），则返还**拒绝好友请求失败**信息，如没有返还则为成功。
 
 > **拒绝好友申请**格式：
 >
@@ -527,7 +533,7 @@ table: relation
 
 只能给在线好友发送信息，离线好友不可
 
-> **发送消息**格式：
+> **发送消息**（客户端）格式：
 >
 > "420 Time_stamp\r\n"
 >
@@ -536,6 +542,16 @@ table: relation
 > "messages\r\n"
 >
 > "\r\n"
+>
+> **发送消息**（服务器端）格式：
+>
+> "420 Time_stamp\r\n"
+>
+> "Name\r\n"
+>
+> "messages\r\n"
+>
+> "\r\n"N
 >
 > **发送失败**格式：
 >
@@ -566,6 +582,22 @@ table: relation
 > "Name\r\n"
 >
 > "REASON\r\n"
+>
+> "\r\n"
+>
+> **删除成功**格式：
+>
+> "432 Time_stamp\r\n"
+>
+> "Name\r\n"
+>
+> "\r\n"
+>
+> **被删除**格式：
+>
+> "433 Time_stamp\r\n"
+>
+> "Name\r\n"
 >
 > "\r\n"
 
