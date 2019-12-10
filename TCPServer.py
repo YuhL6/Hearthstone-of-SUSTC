@@ -1,167 +1,23 @@
 import selectors
 import socket
+import heapq
 import time
 import Conn_to_database
 import Games
+from Tools import *
 
 ServerPort = 14290
-'''users: user_name -> conn'''
+# names: user_name -> user_id
+names = {}
+# users: user_id -> conn
 users = {}
-'''socks: conn -> users'''
+# socks: conn -> users
 socks = {}
 rooms = {}
 undetermined_list = {}
 sel = selectors.DefaultSelector()
 conn_db = Conn_to_database.Conn_DB()
-
-
-class Resolver:
-    def __init__(self):
-        self.data = None
-        self._id = None
-        self._time = None
-        self._method = None
-
-    def resolve(self, data: list):
-        self.data = data
-        self._id = data[1].split(' ')[0]
-        self._time = float(data[0].split(' ')[1])
-        self._method = int(data[0].split(' ')[0])
-
-    def get_id(self):
-        return self._id
-
-    def get_method(self):
-        return self._method
-
-    def get_time(self):
-        return self._time
-
-    def get_password(self):
-        try:
-            return self.data[1].split(' ')[1]
-        except:
-            return None
-
-    def get_user_name(self):
-        try:
-            return self.data[2]
-        except:
-            return None
-
-    def get_email(self):
-        try:
-            email = self.data[3]
-            if email != '':
-                return email
-            else:
-                return None
-        except:
-            return None
-
-    def get_new_password(self):
-        try:
-            return self.data[2]
-        except:
-            return None
-
-    def get_list_name(self):
-        try:
-            return self.data[1].split(' ')[1]
-        except:
-            return None
-
-    def get_card_name(self):
-        try:
-            return int(self.data[2])
-        except:
-            return None
-
-    def get_room_num(self):
-        try:
-            return int(self.data[1].split(' ')[1])
-        except:
-            return None
-
-    def get_receiver(self):
-        try:
-            return self.data[1].split(' ')[1]
-        except:
-            return None
-
-    def get_sender(self):
-        try:
-            return self.data[1].split(' ')[1]
-        except:
-            return None
-
-    def get_delete_num(self):
-        try:
-            return self.data[1].split(' ')[1]
-        except:
-            return None
-
-    def get_room_num(self):
-        try:
-            return int(self.data[1].split(' ')[1])
-        except:
-            return None
-
-    def get_message(self):
-        try:
-            return self.data[2]
-        except:
-            return None
-
-
-class Generator:
-    def __init__(self):
-        pass
-
-    def register_refuse(self, reason):
-        str = '201 {}\r\n'.format(time.time())
-        str += reason
-        str += '\r\n\r\n'
-        return str.encode()
-
-    def register_success(self):
-        str = '202 {}\r\n'.format(time.time())
-        str += '\r\n'
-        return str.encode()
-
-    def log_refuse(self, reason):
-        str = '211 {}\r\n'.format(time.time())
-        str += reason
-        str += '\r\n\r\n'
-        return str.encode()
-
-    def log_success(self, li: list):
-        st = '212 {}\r\n'.format(time.time())
-        for e in li:
-            st += str(e)
-            st += '\r\n'
-        st += '\r\n'
-        print('st: ', st)
-        return st.encode()
-
-    def change_pass_suc(self):
-        str = '222 {}\r\n'.format(time.time())
-        str += '\r\n'
-        return str.encode()
-
-    def change_pass_fail(self, reason):
-        str = '221{}\r\n'.format(time.time())
-        str += reason
-        str += '\r\n\r\n'
-        return str.encode()
-
-    def request(self, name):
-        str = '400 {}\r\n'.format(time.time())
-        str += '{}\r\n\r\n'.format(name)
-        return str.encode()
-
-    def request_accept(self):
-        str = '402 {}\r\n'.format(time.time())
+avalable_ids = []
 
 
 class Executor:
@@ -171,6 +27,7 @@ class Executor:
 
     def execute(self, data, conn):
         self.resolver.resolve(data)
+        print(self.resolver.get_method())
         if self.resolver.get_method() == 200:
             msg = self.register()
             conn.send(msg)
@@ -182,17 +39,42 @@ class Executor:
             self.change_via_old(conn)
         else:
             '''avoid invalid information'''
+            print("here")
             try:
-                if socks[conn].get_id == self.resolver.get_id():
-                    pass
-                else:
-                    conn.send('Invalid access, please re-login')
+                # one logs tries to operates other account
+                if socks[conn].get_id() != self.resolver.get_id():
+                    conn.send(b'Invalid access, please re-login')
                     sel.unregister(conn)
                     conn.close()
+                    return
+                else:
+                    print('nothing')
             except:
-                conn.send('Invalid access, please re-login')
+                # one un-log wants to do sth.
+                conn.send(b'Invalid access, please login')
                 sel.unregister(conn)
                 conn.close()
+                return
+        if self.resolver.get_method() == 350:
+            self.list_room(conn)
+        elif self.resolver.get_method() == 360:
+            self.create_room(conn)
+        elif self.resolver.get_method() == 370:
+            self.add_into_room(conn)
+        elif self.resolver.get_method() == 380:
+            self.get_ready(conn)
+        elif self.resolver.get_method() == 385:
+            self.cancel_ready(conn)
+        elif self.resolver.get_method() == 400:
+            self.request_relation(conn)
+        elif self.resolver.get_method() == 410:
+            self.accept_relation(conn)
+        elif self.resolver.get_method() == 415:
+            self.refuse_relation(conn)
+        elif self.resolver.get_method() == 420:
+            self.chat_with(conn)
+        elif self.resolver.get_method() == 430:
+            self.delete_relation(conn)
 
     def register(self):
         """in this function, user_id is integer"""
@@ -200,6 +82,7 @@ class Executor:
                                , self.resolver.get_user_name(), self.resolver.get_email())
         if res == 0:
             # successfully register
+            names[self.resolver.get_user_name()] = self.resolver.get_id()
             return self.generator.register_success()
         elif res == -1:
             return self.generator.register_refuse('user id already exists')
@@ -227,29 +110,35 @@ class Executor:
             # the first element of user_info is the total game number, the second is the rate
             print("info: ", user_info)
             fr_li = conn_db.get_friend_list(int(self.resolver.get_id()))
-            if fr_li is None:
-                fr_li = []
             print("friends: ", fr_li)
-            player = Games.Player(self.resolver.get_id(), conn, self.resolver.get_time(), user_info[0], fr_li)
             # multi-log covers
+            player = Games.Player(self.resolver.get_id(), conn, self.resolver.get_time(), user_info[0], fr_li)
+            for i in fr_li:
+                if fr_li[i][1] == 1:
+                    try:
+                        users[names[i]].send(self.generator.friend_online(player.get_name()))
+                        socks[users[names[i]]].friend_online(player.get_name())
+                    except:
+                        # means user i log out
+                        pass
             try:
-                u = users[player.get_name()]
-                u.send(b'another one is using this account')
-                u.close()
-                del socks[u]
+                u = users[self.resolver.get_id()]
+                if u != conn:
+                    u.send(b'another one is using this account')
+                    socks[conn] = socks[u]
+                    users[self.resolver.get_id()] = conn
+                    sel.unregister(u)
+                    u.close()
+                    del socks[u]
             except:
-                pass
-            socks[conn] = player
-            users[player.get_name()] = conn
+                users[self.resolver.get_id()] = conn
+                socks[conn] = player
             try:
-                un = undetermined_list[player.get_name()]
+                un = undetermined_list[self.resolver.get_id()]
                 print("un: ", un)
             except:
-                pass
-            user_info.append('friend: {}'.format(len(fr_li)))
-            info = user_info + fr_li
-            print("info: ", info)
-            conn.send(self.generator.log_success(info))
+                un = []
+            conn.send(self.generator.log_success(user_info, fr_li, un))
 
     def change_via_old(self, conn):
         """in this function, user_id is integer"""
@@ -267,42 +156,267 @@ class Executor:
             conn.send(self.generator.change_pass_suc())
             sel.unregister(conn)
             conn.close()
+            try:
+                conn = users[self.resolver.get_id()]
+                conn.send(self.generator.wrong_access("Password has been changed, please re-login"))
+                del users[self.resolver.get_id()]
+                del socks[conn]
+                sel.unregister(conn)
+                conn.close()
+            except:
+                pass
 
-    def request_relation(self):
+    def request_relation(self, conn):
         """in this condition, once a player send one request message, undetermined_list would check the message exists
         or not, if not, documents the message, else ignores it, after another side responses to the request, the
         undetermined_list would add the message into the database and then delete it"""
-        sender = self.resolver.get_id()
-        receiver = self.resolver.get_receiver()
+
+        if self.resolver.get_receiver() == socks[conn].get_name():
+            conn.send(self.generator.request_fail(self.resolver.get_receiver(), "Lonely kid"))
+            return -1
+        try:
+            if len(socks[conn].get_friend_list()[self.resolver.get_receiver()]) != 0:
+                conn.send(self.generator.request_fail(self.resolver.get_receiver(), "Already your friend"))
+            return
+        except:
+            pass
+
+        try:
+            receiver = names[self.resolver.get_receiver()]
+        except:
+            receiver: str = self.resolver.get_receiver()
+            if not receiver.isdigit():
+                conn.send(self.generator.request_fail(self.resolver.get_receiver(), "No such user exists"))
+                return
+            if not conn_db.check_duplicate('user_info', 'user_id', 'user_id = {}'.format(receiver)):
+                conn.send(self.generator.request_fail(self.resolver.get_receiver(), "No such user exists"))
+                return
         try:
             un = undetermined_list[receiver]
-            # if the the request is frequent, no action
-            if self.resolver.get_time() - un[sender] < 3:
-                return
-            un[sender] = self.resolver.get_time()
         except:
-            undetermined_list[receiver][sender] = self.resolver.get_time()
-
-        users[receiver].send(self.generator.request(sender))
+            undetermined_list[receiver] = {}
+        undetermined_list[receiver][socks[conn].get_name()] = 1
+        try:
+            users[receiver].send(self.generator.request(socks[conn].get_name()))
+        except:
+            pass
 
     def accept_relation(self, conn):
         sender = self.resolver.get_sender()
+        receiver = self.resolver.get_id()
         try:
-            del undetermined_list[self.resolver.get_id()][sender]
-            users[self.resolver.get_id()].send()
-            users[sender].conn.send()
-            conn_db.add_relation()
+            del undetermined_list[receiver][sender]
+            try:
+                users[names[sender]].send(self.generator.add_success(socks[conn].get_name(), 1))
+                conn.send(self.generator.add_success(self.resolver.get_sender(), 1))
+            except:
+                conn.send(self.generator.add_success(self.resolver.get_sender(), 0))
+            try:
+                socks[conn].add_friend(sender)
+                socks[users[names[sender]]].add_friend(socks[conn].get_name())
+            except:
+                pass
+            conn_db.add_relation(names[sender], receiver)
         except:
-            conn.send(b'No request')
+            conn.send(self.generator.accept_fail(sender, "No request"))
 
     def refuse_relation(self, conn):
         sender = self.resolver.get_sender()
+        receiver = self.resolver.get_id()
         try:
-            del undetermined_list[self.resolver.get_id()][sender]
-            users[self.resolver.get_id()].send()
-            users[sender].send()
+            del undetermined_list[receiver][sender]
+            try:
+                users[names[sender]].send(self.generator.request_fail(socks[conn].get_name(), "The user refused you"
+                                                                                              "r request"))
+            except:
+                pass
         except:
             conn.send(b'No request')
+
+    def delete_relation(self, conn):
+        id1 = self.resolver.get_id()
+        id2 = names[self.resolver.get_delete_name()]
+        try:
+            socks[conn].delete_friend(self.resolver.get_delete_name())
+            socks[users[id2]].delete_friend(socks[conn].get_name())
+        except:
+            pass
+        if conn_db.delete_relation(id1, id2):
+            try:
+                users[id2].send(self.generator.deleted(socks[conn].get_name()))
+            except:
+                pass
+            conn.send(self.generator.delete_success(self.resolver.get_delete_name()))
+        else:
+            conn.send(self.generator.delete_fail(self.resolver.get_delete_name(), "The user is not your friend or not "
+                                                                                  "exists"))
+
+    def chat_with(self, conn):
+        """receiver can only be name"""
+        global receiver
+        try:
+            receiver = names[self.resolver.get_receiver()]
+        except:
+            conn.send(self.generator.send_msg_fail(receiver, 'User not exists'))
+            return
+        try:
+            users[receiver].send(self.generator.send_msg(socks[conn].get_name(), self.resolver.get_message()))
+        except:
+            conn.send(self.generator.send_msg_fail(receiver, 'User not online'))
+
+    def list_room(self, conn):
+        conn.send(self.generator.list_room(rooms))
+
+    def create_room(self, conn):
+        if socks[conn].get_status() > 1:
+            conn.send(self.generator.create_room_fail("Status error"))
+            return
+        if len(avalable_ids) == 0:
+            new_id = len(rooms) + 1
+        else:
+            new_id = heapq.heappop()
+        room = Games.Room(new_id, self.resolver.get_id(), socks[conn].get_name())  # no password version
+        rooms[new_id] = room
+        socks[conn].in_room(new_id)
+        socks[conn].ready()
+        # user status changes, need broadcast
+        conn.send(self.generator.create_room_suc(new_id))
+        fr_li = socks[conn].get_friend_list()
+        for i in fr_li:
+            if fr_li[i][1] == 1:
+                try:
+                    socks[users[names[i]]].friend_in_room(socks[conn].get_name())
+                    users[names[i]].send(self.generator.friend_in_room(socks[conn].get_name()))
+                except:
+                    pass
+        # room list changes, need broadcast
+        for user in users:
+            try:
+                users[user].send(self.generator.new_room(new_id, socks[conn].get_name()))
+            except:
+                # user outline
+                pass
+
+    def add_into_room(self, conn):
+        try:
+            rooms[self.resolver.get_room_num()]
+        except:
+            conn.send(self.generator.add_room_fail(self.resolver.get_room_num(), "No room exists"))
+            return
+        if socks[conn].in_room(self.resolver.get_room_num()) == -1:
+            conn.send(self.generator.add_room_fail(self.resolver.get_room_num(), "Status error"))
+            return
+        res = rooms[self.resolver.get_room_num()].add_player(self.resolver.get_id(), socks[conn].get_name())
+        if res == -1:
+            conn.send(self.generator.add_room_fail(self.resolver.get_room_num(), "Wrong password"))
+        elif res == -2:
+            conn.send(self.generator.add_room_fail(self.resolver.get_room_num(), "The room is full"))
+        else:
+            conn.send(self.generator.add_room_suc(self.resolver.get_room_num()))
+            try:
+                users[rooms[self.resolver.get_room_num()].get_owner()].send(self.generator.player_in(
+                    self.resolver.get_room_num(), socks[conn].get_name()))
+            except:
+                # owner is outline
+                pass
+            fr_li = socks[conn].get_friend_list()
+            for i in fr_li:
+                if fr_li[i][1] == 1:
+                    try:
+                        users[names[i]].send(self.generator.friend_in_room(socks[conn].get_name()))
+                        socks[users[names[i]]].friend_in_room(socks[conn].get_name())
+                    except:
+                        pass
+            for user in users:
+                try:
+                    users[user].send(self.generator.room_full(self.resolver.get_room_num()))
+                except:
+                    pass
+
+    def get_ready(self, conn):
+        if socks[conn].get_room() != self.resolver.get_room_num():
+            conn.send(self.generator.ready_fail(self.resolver.get_room_num(), "You are ont in the room"))
+            return
+        res = socks[conn].ready()
+        if res == -1:
+            conn.send(self.generator.ready_fail(self.resolver.get_room_num(), "Status error: user"))
+            return
+        res = rooms[self.resolver.get_room_num()].ready()
+        if res == -1:
+            socks[conn].not_ready()
+            conn.send(self.generator.ready_fail(self.resolver.get_room_num(), "Status error: room"))
+            return
+        conn.send(self.generator.ready_suc(rooms[self.resolver.get_room_num()]))
+        try:
+            users[rooms[self.resolver.get_room_num()].get_owner].send(self.generator.player_ready(
+                self.resolver.get_room_num()))
+        except:
+            pass
+
+    def cancel_ready(self, conn):
+        res = socks[conn].not_ready()
+        if res == -1:
+            conn.send(self.generator.ready_fail(self.resolver.get_room_num(), "Status error: user"))
+            return
+        res = rooms[self.resolver.get_room_num()].not_ready()
+        if res == -1:
+            socks[conn].ready()
+            conn.send(self.generator.ready_fail(self.resolver.get_room_num(), "Status error: room"))
+            return
+        try:
+            users[rooms[self.resolver.get_room_num()].get_owner].send(self.generator.player_not_ready(
+                self.resolver.get_room_num()))
+        except:
+            pass
+
+    def leave_room(self, conn):
+        global msg
+        room_id = self.resolver.get_room_num()
+        if socks[conn].get_room != room_id:
+            conn.send(self.generator.leave_room_fail(room_id, "You are not in the room"))
+            return
+        res = socks[conn].out_room()
+        if res == -1:
+            conn.send(self.generator.leave_room_fail(room_id, "Status error: user"))
+            return
+        res = rooms[room_id].delete_player(self.resolver.get_id())
+        if res == -1:
+            conn.send(self.generator.leave_room_fail(room_id, "Room is gaming"))
+            return
+        elif res == -2:
+            conn.send(self.generator.leave_room_fail(room_id, "Invalid operation"))
+            return
+        elif res == 0:
+            conn.send(self.generator.leave_room_suc(room_id))
+            msg = self.generator.room_empty(room_id)
+            try:
+                users[rooms[room_id].get_owner()].send(self.generator.player_out(room_id))
+            except:
+                # owner is outline
+                pass
+        elif res == 1:
+            conn.send(self.generator.leave_room_suc(room_id))
+            msg = self.generator.owner_change(room_id, rooms[room_id].get_owner_name())
+        elif res == 2:
+            conn.send(self.generator.leave_room_suc(self.resolver.get_room_num()))
+            msg = self.generator.delete_room(self.resolver.get_room_num())
+            heapq.heappush(avalable_ids, self.resolver.get_room_num())
+        fr_li = socks[conn].get_friend_list()
+        for i in fr_li:
+            if fr_li[i][1] == 1:
+                try:
+                    socks[users[names[i]]].friend_out_room(socks[conn].get_name())
+                    users[names[i]].send(self.generator.friend_out_room(socks[conn].get_name()))
+                except:
+                    pass
+        # room list changes, need broadcast
+        for user in users:
+            try:
+                users[user].send(msg)
+            except:
+                # user outline
+                pass
+
 
 
 class TCPServer:
@@ -322,19 +436,14 @@ class TCPServer:
         try:
             data = conn.recv(1024)
         except:
-            player = socks[conn]
-            conn_db.log_out(player.get_id())
-            sel.unregister(conn)
-            conn.close()
-            del users[player.get_name()]
-            del socks[conn]
+            self.close_sock(conn)
             return -1
 
         data = data.decode()
 
         if data:
             if not data.endswith('\r\n\r\n'):
-                conn.send(b'Invalid message')
+                conn.send(b'Wrong format')
                 sel.unregister(conn)
                 conn.close()
                 return -2
@@ -342,7 +451,7 @@ class TCPServer:
             data = data.split('\r\n')
 
             if len(data) < 2:
-                conn.send(b'Invalid message')
+                conn.send(b'Wrong format')
                 sel.unregister(conn)
                 conn.close()
                 return -2
@@ -359,36 +468,44 @@ class TCPServer:
                 print(data)
                 self.executor.execute(data, conn)
             except:
-                sel.unregister(conn)
-                conn.close()
+                try:
+                    conn.send(b'Unresolvable message')
+                    # self.close_sock(conn)
+                except:
+                    pass
                 return -4
         else:
             try:
-                player = socks[conn]
-                conn_db.log_out(player.get_id())
-                del users[player.get_name()]
-                del socks[conn]
+                self.close_sock(conn)
             except:
                 pass
-            print('closing', conn)
-            sel.unregister(conn)
-            conn.close()
+            return -1
+
+    def close_sock(self, conn):
+        try:
+            player = socks[conn]
+            conn_db.log_out(player.get_id())
+            del users[player.get_id()]
+            del socks[conn]
+        except:
+            pass
+        sel.unregister(conn)
+        conn.close()
 
     def start_server(self):
         self.sock.bind(('', 14290))
         self.sock.listen(100)
         self.sock.setblocking(False)
+        res = conn_db.get_user_list()
+        print(res)
+        for r in res:
+            names[r[1]] = r[0]
         sel.register(self.sock, selectors.EVENT_READ, self.accept)
 
 
 def send(id, msg):
     sock = users[id]
     sock.send(msg)
-
-
-def broadcast(li: list, msg):
-    for i in li:
-        send(i, msg)
 
 
 def run():

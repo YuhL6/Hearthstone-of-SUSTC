@@ -342,7 +342,7 @@ table: relation
 
 ###### 列出房间
 
-> **列出房间**格式：
+> **列出房间 list_room**格式：
 >
 > "350 Time_stamp\r\n"
 >
@@ -362,7 +362,7 @@ table: relation
 
 ###### 创建房间
 
-> **创建房间**格式：
+> **创建房间 create_room**格式：
 >
 > "360 Time_stamp\r\n"
 >
@@ -370,7 +370,7 @@ table: relation
 >
 > "\r\n"
 >
-> **创建房间失败**格式：
+> **创建房间失败 create_room_fail**格式：
 >
 > "361 Time_stamp\r\n"
 >
@@ -378,7 +378,7 @@ table: relation
 >
 > "\r\n"
 >
-> **创建房间成功**格式：
+> **创建房间成功 create_room_suc**格式：
 >
 > "362 Time_stamp\r\n"
 >
@@ -390,7 +390,7 @@ table: relation
 
 ###### 加入房间
 
-> **加入房间**格式：
+> **加入房间 add_into_room**格式：
 >
 > "370 Time_stamp\r\n"
 >
@@ -398,7 +398,7 @@ table: relation
 >
 > "\r\n"
 >
-> **加入失败**格式：
+> **加入失败 add_room_fail**格式：
 >
 > "371 Time_stamp\r\n"
 >
@@ -406,7 +406,7 @@ table: relation
 >
 > "\r\n"
 >
-> **加入成功**格式：
+> **加入成功 add_room_suc**格式：
 >
 > "372 Time_stamp\r\n"
 >
@@ -418,7 +418,7 @@ table: relation
 
 ###### 准备游戏
 
-> **准备游戏**格式：
+> **准备游戏 get_ready**格式：
 >
 > "380 Time_stamp\r\n"
 >
@@ -426,7 +426,7 @@ table: relation
 >
 > "\r\n"
 >
-> **准备游戏失败**格式：
+> **准备游戏失败 ready_fail**格式：
 >
 > "381 Time_stamp\r\n"
 >
@@ -436,7 +436,7 @@ table: relation
 >
 > "\r\n"
 >
-> **准备游戏成功**格式：
+> **准备游戏成功 ready_suc**格式：
 >
 > "382 Time_stamp\r\n"
 >
@@ -444,7 +444,33 @@ table: relation
 >
 > "\r\n"
 
+###### 取消准备
 
+> **取消准备 cancel_ready**格式：
+>
+> "385 Time_stamp\r\n"
+>
+> "User_id Room_number\r\n"
+>
+> "\r\n"
+>
+> **取消准备失败 ready_fail**格式：
+>
+> "386 Time_stamp\r\n"
+>
+> "Room_number\r\n"
+>
+> "REASON\r\n"
+>
+> "\r\n"
+>
+> **取消准备游戏成功 ready_suc**格式：
+>
+> "387 Time_stamp\r\n"
+>
+> "Room_number\r\n"
+>
+> "\r\n"
 
 ###### 开始游戏
 
@@ -462,20 +488,23 @@ table: relation
 >
 > **开始成功**格式：
 >
-> "392 time_stamp/r/n"
+> "392 Time_stamp\r\n"
 >
-> "User_name/r/n"
+> "User_name\r\n"
+>
+> "\r\n"
 
 
 
 ###### 退出房间
 
-> **退出房间**格式：
+> **退出房间 leave_room**格式：
 >
-> "395 time_stamp/r/n"
+> "395 Time_stamp\r\n"
 >
-> "User_name/r/n"
+> "User_name\r\n"
 >
+> '\r\n'
 
 
 
@@ -697,7 +726,7 @@ table: relation
 
 ###### 好友登录/退出推送
 
-> **好友上线**提示格式：
+> **好友上线 friend_online**提示格式：
 >
 > "100 Time_stamp\r\n"
 >
@@ -705,7 +734,7 @@ table: relation
 >
 > "\r\n"
 >
-> **好友下线**提示格式：
+> **好友下线 friend_outline** 提示格式：
 >
 > "101 Time_stamp\r\n"
 >
@@ -715,7 +744,7 @@ table: relation
 
 ###### 好友状态改变推送（好友视角）
 
-> **好友进入房间**提示格式：
+> **好友进入房间 friend_in_room**提示格式：
 >
 > "102 Time_stamp\r\n"
 >
@@ -723,7 +752,7 @@ table: relation
 >
 > "\r\n"
 >
-> **好友退出房间**提示格式：
+> **好友退出房间 friend_out_room**提示格式：
 >
 > "103 Time_stamp\r\n"
 >
@@ -731,7 +760,7 @@ table: relation
 >
 > "\r\n"
 >
-> **好友进入游戏**提示格式：
+> **好友进入游戏 friend_in_game**提示格式：
 >
 > "104 Time_stamp\r\n"
 >
@@ -739,7 +768,7 @@ table: relation
 >
 > "\r\n"
 >
-> **好友退出游戏**提示格式：
+> **好友退出游戏 friend_out_game**提示格式：
 >
 > "105 Time_stamp\r\n"
 >
@@ -747,9 +776,9 @@ table: relation
 >
 > "\r\n"
 
-###### 新增房间/减少房间
+###### 房间状态改变（外部视角）
 
-> **新增房间**格式：
+> **新增房间 new_room**格式：
 >
 > "106 Time_stamp\r\n"
 >
@@ -757,17 +786,15 @@ table: relation
 >
 > "\r\n"
 >
-> **房间减少**格式：
+> **删除房间 delete_room**格式：
 >
 > "107 Time_stamp\r\n"
 >
 > "Room_id\r\n"
 >
 > "\r\n"
-
-###### 房间状态改变（外部视角）
-
-> **玩家加入房间**格式：
+>
+> **玩家加入房间 room_full**格式：
 >
 > "108 Time_stamp\r\n"
 >
@@ -775,7 +802,7 @@ table: relation
 >
 > "\r\n"
 >
-> **玩家退出房间**格式：
+> **玩家退出房间 room_empty**格式：
 >
 > "109 Time_stamp\r\n"
 >
@@ -783,7 +810,7 @@ table: relation
 >
 > "\r\n"
 >
-> **房间开始游戏**格式：
+> **房间开始游戏 room_start_game**格式：
 >
 > "110 Time_stamp\r\n"
 >
@@ -791,7 +818,7 @@ table: relation
 >
 > "\r\n"
 >
-> **房间结束游戏**格式：
+> **房间结束游戏 room_end_game**格式：
 >
 > "111 Time_stamp\r\n"
 >
@@ -801,7 +828,7 @@ table: relation
 
 ###### 房间状态改变（房主视角）
 
-> **玩家加入房间**格式：
+> **玩家加入房间 player_in**格式：
 >
 > "112 Time_stamp\r\n"
 >
@@ -809,7 +836,7 @@ table: relation
 >
 > "\r\n"
 >
-> **玩家退出房间**格式：
+> **玩家退出房间 player_out**格式：
 >
 > "113 Time_stamp\r\n"
 >
@@ -817,7 +844,7 @@ table: relation
 >
 > "\r\n"
 >
-> **玩家准备**格式：
+> **玩家准备 player_ready**格式：
 >
 > "114 Time_stamp\r\n"
 >
@@ -825,7 +852,7 @@ table: relation
 >
 > "\r\n"
 >
-> **玩家取消准备**格式
+> **玩家取消准备 player_not_ready**格式
 >
 > "115 Time_stamp\r\n"
 >

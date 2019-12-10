@@ -43,71 +43,144 @@ class Player:
         return self._status
 
     def get_name(self):
-        return self._status
+        return self._name
 
-    '''def ready(self, server: Server.TCPServer):
-        self._status = 3
-        server.broadcast(self._friends_list, b'')
+    def get_friend_list(self):
+        return self._friends_list
 
-    def in_room(self, server: Server.TCPServer):
+    def friend_online(self, name):
+        self._friends_list[name][1] = 1
+
+    def friend_outline(self, name):
+        self._friends_list[name][1] = 0
+
+    def friend_in_room(self, name):
+        self._friends_list[name][1] = 2
+
+    def friend_in_game(self, name):
+        self._friends_list[name][1] = 3
+
+    def friend_out_game(self, name):
+        self._friends_list[name][1] = 2
+
+    def friend_out_room(self, name):
+        self._friends_list[name][1] = 1
+
+    def add_friend(self, name):
+        self._friends_list[name] = ['', 1]
+
+    def delete_friend(self, name):
+        del self._friends_list[name]
+
+    def in_room(self, room_id):
+        if self._status >= 2:
+            return -1
         self._status = 2
-        server.broadcast(self._friends_list, b'')
+        self._room = room_id
+        return 0
 
-    def out_room(self, server: Server.TCPServer):
+    def out_room(self):
+        if self._status != 2:
+            return -1
         self._status = 1
-        server.broadcast(self._friends_list, b'')
+        return 0
 
-    def start_game(self, server: Server.TCPServer):
-        self._status = 4
-        server.broadcast(self._friends_list, b'')'''
+    def ready(self):
+        if self._status != 2:
+            return -1
+        self._status = 3
+        return 0
+
+    def not_ready(self):
+        if self._status != 3:
+            return -1
+        self._status = 2
+        return 0
 
 
 class Room:
-    def __init__(self, id, owner: Player, server, password=None):
+    def __init__(self, id, owner_id, owner_name, password=None):
         """
         status: 0 means empty, 1 means full, 2 means ready, 3 means gaming
         if the owner set password, any one who wants to add into the room needs to enter the password
 
         """
-        self.id = id
-        self.owner = owner
-        self.owner.ready(server)
-        self.player = None
+        self._id = id
+        self._owner = owner_id
+        self._owner_name = owner_name
+        self._attacker = -1
+        self._attacker_name = ''
         self.field = None
-        self.status = 0
-        self.password = password
+        self._status = 0
+        self._password = password
+
+    def get_id(self):
+        return self._id
+
+    def get_owner(self):
+        return self._owner
+
+    def get_owner_name(self):
+        return self._owner_name
+
+    def get_attacker(self):
+        return self._attacker
+
+    def get_status(self):
+        return self._status
 
     def start_game(self):
-        if self.status != 2:
+        if self._status != 2:
             # not ready
             return -1
         self.field = Field()
-        self.status = 3
+        self._status = 3
         return 0
 
-    def add_player(self, player: Player, password=None):
-        if self.password != password:
+    def add_player(self, player, player_name, password=None):
+        if self._password != password:
             return -1
-        self.player = player
-        self.status = 1
+        if self._status != 0:
+            return -2
+        self._attacker = player
+        self._attacker_name = player_name
+        self._status = 1
         return 0
 
     def ready(self):
-        if self.status != 1:
+        if self._status != 1:
             return -1
-        self.status = 2
-        self.player.ready()
+        self._status = 2
         return 0
 
-    def delete_player(self):
-        if self.status == 3:
+    def not_ready(self):
+        if self._status != 2:
+            return -1
+        self._status = 1
+        return 0
+
+    def delete_player(self, player):
+        if self._status == 3:
+            # Room is gaming
+            return -1
+        if player == self._attacker and self._status != 0:
+            self._status = 0
+            return 0
+        elif player == self._attacker:
             # invalid operation
             return -2
-        if self.status >= 1:
-            # empty room
-            return -1
-        self.player = None
-        self.status = 0
+        if player == self._owner:
+            if self._status == 1 or self._status == 2:
+                self._owner = self._attacker
+                self._owner_name = self._attacker_name
+                self._status = 0
+                # owner is changed
+                return 1
+            else:
+                # room is deleted
+                return 2
+
+
 
     def change_owner(self):
         if self.status < 1:
