@@ -275,65 +275,6 @@ class Generator:
         str += '\r\n'
         return str.encode()
 
-    def list_room(self, rooms):
-        str = '352 {}\r\n'.format(time.time())
-        str += '{}\r\n'.format(len(rooms))
-        for r in rooms:
-            str += '{} {} {}\r\n'.format(r, rooms[r].get_status(), rooms[r].get_owner_name())
-        str += '\r\n'
-        return str.encode()
-
-    def create_room_fail(self, reason):
-        str = '361 {}\r\n'.format(time.time())
-        str += '{}\r\n\r\n'.format(reason)
-        return str.encode()
-
-    def create_room_suc(self, room_id):
-        str = '362 {}\r\n{}\r\n\r\n'.format(time.time(), room_id)
-        return str.encode()
-
-    def add_room_fail(self, room_id, reason):
-        str = '371 {}\r\n'.format(time.time())
-        str += '{} {}\r\n'.format(room_id, reason)
-        str += '\r\n'
-        return str.encode()
-
-    def add_room_suc(self, room_id):
-        str = '372 {}\r\n'.format(time.time())
-        str += '{}\r\n'.format(room_id)
-        str += '\r\n'
-        return str.encode()
-
-    def ready_fail(self, room_id, reason):
-        str = "381 {}\r\n".format(time.time())
-        str += "{}\r\n{}\r\n\r\n".format(room_id, reason)
-        return str.encode()
-
-    def ready_suc(self, room_id):
-        str = "382 {}\r\n".format(time.time())
-        str += "{}\r\n\r\n".format(room_id)
-        return str.encode()
-
-    def cancle_ready_fail(self, room_id, reason):
-        str = "386 {}\r\n".format(time.time())
-        str += "{}\r\n{}\r\n\r\n".format(room_id, reason)
-        return str.encode()
-
-    def cancel_ready_suc(self, room_id):
-        str = "387 {}\r\n".format(time.time())
-        str += "{}\r\n\r\n".format(room_id)
-        return str.encode()
-
-    def leave_room_fail(self, room_id, reason):
-        str = "396 {}\r\n".format(time.time())
-        str += "{}\r\n{}\r\n\r\n".format(room_id, reason)
-        return str.encode()
-
-    def leave_room_suc(self, room_id):
-        str = "397 {}\r\n".format(time.time())
-        str += "{}\r\n\r\n".format(room_id)
-        return str.encode()
-
     def request(self, name):
         str = '400 {}\r\n'.format(time.time())
         str += '{}\r\n\r\n'.format(name)
@@ -388,4 +329,63 @@ class Generator:
     def deleted(self, name):
         str = '433 {}\r\n'.format(time.time())
         str += '{}\r\n\r\n'.format(name)
+        return str.encode()
+
+    def list_room(self, rooms):
+        str = '502 {}\r\n'.format(time.time())
+        str += '{}\r\n'.format(len(rooms))
+        for r in rooms:
+            str += '{} {} {}\r\n'.format(r, rooms[r].get_status(), rooms[r].get_owner_name())
+        str += '\r\n'
+        return str.encode()
+
+    def create_room_fail(self, reason):
+        str = '511 {}\r\n'.format(time.time())
+        str += '{}\r\n\r\n'.format(reason)
+        return str.encode()
+
+    def create_room_suc(self, room_id):
+        str = '512 {}\r\n{}\r\n\r\n'.format(time.time(), room_id)
+        return str.encode()
+
+    def add_room_fail(self, room_id, reason):
+        str = '521 {}\r\n'.format(time.time())
+        str += '{} {}\r\n'.format(room_id, reason)
+        str += '\r\n'
+        return str.encode()
+
+    def add_room_suc(self, room_id):
+        str = '522 {}\r\n'.format(time.time())
+        str += '{}\r\n'.format(room_id)
+        str += '\r\n'
+        return str.encode()
+
+    def ready_fail(self, room_id, reason):
+        str = "531 {}\r\n".format(time.time())
+        str += "{}\r\n{}\r\n\r\n".format(room_id, reason)
+        return str.encode()
+
+    def ready_suc(self, room_id):
+        str = "532 {}\r\n".format(time.time())
+        str += "{}\r\n\r\n".format(room_id)
+        return str.encode()
+
+    def cancle_ready_fail(self, room_id, reason):
+        str = "536 {}\r\n".format(time.time())
+        str += "{}\r\n{}\r\n\r\n".format(room_id, reason)
+        return str.encode()
+
+    def cancel_ready_suc(self, room_id):
+        str = "537 {}\r\n".format(time.time())
+        str += "{}\r\n\r\n".format(room_id)
+        return str.encode()
+
+    def leave_room_fail(self, room_id, reason):
+        str = "546 {}\r\n".format(time.time())
+        str += "{}\r\n{}\r\n\r\n".format(room_id, reason)
+        return str.encode()
+
+    def leave_room_suc(self, room_id):
+        str = "547 {}\r\n".format(time.time())
+        str += "{}\r\n\r\n".format(room_id)
         return str.encode()

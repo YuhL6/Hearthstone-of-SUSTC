@@ -65,6 +65,7 @@ class Conn_DB:
             return None
 
     def get_friend_list(self, user_id):
+        global res
         mysql = 'select b.user_name, a.name2, b.status from (select user_id2, name2 from relation where ' \
                 'user_id1 = {}) a join user_info b on a.user_id2 = b.user_id;'.format(user_id)
         try:

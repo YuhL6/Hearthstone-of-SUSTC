@@ -89,14 +89,14 @@ def delete_friend(user_id):
 
 
 def list_room(user_id):
-    str = "350 {}\r\n".format(time.time())
+    str = "500 {}\r\n".format(time.time())
     str += "{}\r\n\r\n".format(user_id)
     str = str.encode()
     sock.send(str)
 
 
 def create_room(user_id):
-    str = "360 {}\r\n".format(time.time())
+    str = "510 {}\r\n".format(time.time())
     str += "{}\r\n\r\n".format(user_id)
     str = str.encode()
     sock.send(str)
@@ -104,22 +104,31 @@ def create_room(user_id):
 
 def add_room(user_id):
     room = input("Room: ")
-    str = "370 {}\r\n".format(time.time())
-    str += "{} {}\r\n\r\n".format(user_id, room)
-    str = str.encode()
-    sock.send(str)
-    return room
-
-
-def get_ready(user_id, room):
-    str = "380 {}\r\n".format(time.time())
+    str = "520 {}\r\n".format(time.time())
     str += "{} {}\r\n\r\n".format(user_id, room)
     str = str.encode()
     sock.send(str)
 
 
-def cancel_ready(user_id, room):
-    str = "385 {}\r\n".format(time.time())
+def get_ready(user_id):
+    room = input("Room: ")
+    str = "530 {}\r\n".format(time.time())
+    str += "{} {}\r\n\r\n".format(user_id, room)
+    str = str.encode()
+    sock.send(str)
+
+
+def cancel_ready(user_id):
+    room = input("Room: ")
+    str = "535 {}\r\n".format(time.time())
+    str += "{} {}\r\n\r\n".format(user_id, room)
+    str = str.encode()
+    sock.send(str)
+
+
+def out_room(user_id):
+    room = input("Room: ")
+    str = "545 {}\r\n".format(time.time())
     str += "{} {}\r\n\r\n".format(user_id, room)
     str = str.encode()
     sock.send(str)
@@ -136,7 +145,6 @@ def listen():
 
 def cmd():
     global user_id
-    global room
     print("Welcome to the Hearthstone-of-SUSTC: Command-line-version\r\n"
           "// the GUI version may never come out")
     print("Now what do you want? tip: you can type 'help' or '?' to know how to use this 'GUI'")
@@ -151,11 +159,12 @@ def cmd():
                   "5/re:        refuse others' requests (I know you have many fans);\r\n"
                   "6/msg:       send message to your friend;\r\n"
                   "7/del:       delete your friend (careful not your girl/boyfriend);       //if you have one\r\n"
-                  "8/lr:        list room;\r\n"
-                  "9/cr:        create room;\r\n"
-                  "10/addr:     add into a room;\r\n"
+                  "8/listr:     list room;\r\n"
+                  "9/create:    create room;\r\n"
+                  "10/inroom:   add into a room;\r\n"
                   "11/ready:    get ready;\r\n"
-                  "12/cancel:   cancel ready;\r\n")
+                  "12/cancel:   cancel ready;\r\n"
+                  "13/outroom:  get out of room;\r\n")
         elif a == '':
             pass
         elif a == '0' or a == 'chp':
@@ -174,16 +183,18 @@ def cmd():
             send_msg(user_id)
         elif a == '7' or a == 'del':
             delete_friend(user_id)
-        elif a == '8' or a == 'lr':
+        elif a == '8' or a == 'listr':
             list_room(user_id)
-        elif a == '9' or a == 'cr':
+        elif a == '9' or a == 'create':
             create_room(user_id)
-        elif a == '10' or a == 'addr':
-            room = add_room(user_id)
+        elif a == '10' or a == 'inroom':
+            add_room(user_id)
         elif a == '11' or a == 'ready':
-            get_ready(user_id, room)
+            get_ready(user_id)
         elif a == '12' or a == 'cancel':
-            cancel_ready(user_id, room)
+            cancel_ready(user_id)
+        elif a == '13' or a == 'outroom':
+            out_room(user_id)
         else:
             print("What the hell you are talking about, use 'help' wouldn't kill you")
 

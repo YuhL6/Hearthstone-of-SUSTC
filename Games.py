@@ -80,7 +80,7 @@ class Player:
         return 0
 
     def out_room(self):
-        if self._status != 2:
+        if self._status != 2 and self._status != 3:
             return -1
         self._status = 1
         return 0
@@ -166,9 +166,6 @@ class Room:
         if player == self._attacker and self._status != 0:
             self._status = 0
             return 0
-        elif player == self._attacker:
-            # invalid operation
-            return -2
         if player == self._owner:
             if self._status == 1 or self._status == 2:
                 self._owner = self._attacker

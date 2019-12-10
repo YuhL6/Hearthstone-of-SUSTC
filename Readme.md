@@ -1,4 +1,4 @@
-# 				南方科技大学炉石传说开发手册（草稿六）
+# 				南方科技大学炉石传说开发手册（草稿七）
 
 #### 概述
 
@@ -340,174 +340,6 @@ table: relation
 
 
 
-###### 列出房间
-
-> **列出房间 list_room**格式：
->
-> "350 Time_stamp\r\n"
->
-> "User_id\r\n"
->
-> "\r\n"
->
-> **房间**格式:
->
-> "352 Time_stamp\r\n"
->
-> "ROOM_NUMBER\r\n"
->
-> "Room_id Room_status Room_owner Room_attacker/r/n"
->
-> "\r\n"
-
-###### 创建房间
-
-> **创建房间 create_room**格式：
->
-> "360 Time_stamp\r\n"
->
-> "User_id\r\n"
->
-> "\r\n"
->
-> **创建房间失败 create_room_fail**格式：
->
-> "361 Time_stamp\r\n"
->
-> "REASON\r\n"
->
-> "\r\n"
->
-> **创建房间成功 create_room_suc**格式：
->
-> "362 Time_stamp\r\n"
->
-> "Room_id\r\n"
->
-> "\r\n"
-
-
-
-###### 加入房间
-
-> **加入房间 add_into_room**格式：
->
-> "370 Time_stamp\r\n"
->
-> "User_id room_number\r\n"
->
-> "\r\n"
->
-> **加入失败 add_room_fail**格式：
->
-> "371 Time_stamp\r\n"
->
-> "Room_id REASON\r\n"
->
-> "\r\n"
->
-> **加入成功 add_room_suc**格式：
->
-> "372 Time_stamp\r\n"
->
-> "Room_id\r\n"
->
-> "\r\n"
-
-
-
-###### 准备游戏
-
-> **准备游戏 get_ready**格式：
->
-> "380 Time_stamp\r\n"
->
-> "User_id Room_number\r\n"
->
-> "\r\n"
->
-> **准备游戏失败 ready_fail**格式：
->
-> "381 Time_stamp\r\n"
->
-> "Room_number\r\n"
->
-> "REASON\r\n"
->
-> "\r\n"
->
-> **准备游戏成功 ready_suc**格式：
->
-> "382 Time_stamp\r\n"
->
-> "Room_number\r\n"
->
-> "\r\n"
-
-###### 取消准备
-
-> **取消准备 cancel_ready**格式：
->
-> "385 Time_stamp\r\n"
->
-> "User_id Room_number\r\n"
->
-> "\r\n"
->
-> **取消准备失败 ready_fail**格式：
->
-> "386 Time_stamp\r\n"
->
-> "Room_number\r\n"
->
-> "REASON\r\n"
->
-> "\r\n"
->
-> **取消准备游戏成功 ready_suc**格式：
->
-> "387 Time_stamp\r\n"
->
-> "Room_number\r\n"
->
-> "\r\n"
-
-###### 开始游戏
-
-> **开始游戏**格式：
->
-> "390 time_stamp/r/n"
->
-> "User_name/r/n"
->
-> **开始失败**格式：
->
-> "391 time_stamp/r/n"
->
-> "User_name reason/r/n"
->
-> **开始成功**格式：
->
-> "392 Time_stamp\r\n"
->
-> "User_name\r\n"
->
-> "\r\n"
-
-
-
-###### 退出房间
-
-> **退出房间 leave_room**格式：
->
-> "395 Time_stamp\r\n"
->
-> "User_name\r\n"
->
-> '\r\n'
-
-
-
 #### 好友系统
 
 ###### 请求好友
@@ -682,7 +514,195 @@ table: relation
 
 #### 对战系统
 
+###### 列出房间
 
+> **列出房间 list_room**格式：
+>
+> "500 Time_stamp\r\n"
+>
+> "User_id\r\n"
+>
+> "\r\n"
+>
+> **房间**格式:
+>
+> "502 Time_stamp\r\n"
+>
+> "ROOM_NUMBER\r\n"
+>
+> "Room_id Room_status Room_owner/r/n"
+>
+> "\r\n"
+
+###### 创建房间
+
+> **创建房间 create_room**格式：
+>
+> "510 Time_stamp\r\n"
+>
+> "User_id\r\n"
+>
+> "\r\n"
+>
+> **创建房间失败 create_room_fail**格式：
+>
+> "511 Time_stamp\r\n"
+>
+> "REASON\r\n"
+>
+> "\r\n"
+>
+> **创建房间成功 create_room_suc**格式：
+>
+> "512 Time_stamp\r\n"
+>
+> "Room_id\r\n"
+>
+> "\r\n"
+
+
+
+###### 加入房间
+
+> **加入房间 add_into_room**格式：
+>
+> "520 Time_stamp\r\n"
+>
+> "User_id room_number\r\n"
+>
+> "\r\n"
+>
+> **加入失败 add_room_fail**格式：
+>
+> "521 Time_stamp\r\n"
+>
+> "Room_id REASON\r\n"
+>
+> "\r\n"
+>
+> **加入成功 add_room_suc**格式：
+>
+> "522 Time_stamp\r\n"
+>
+> "Room_id\r\n"
+>
+> "\r\n"
+
+
+
+###### 准备游戏
+
+> **准备游戏 get_ready**格式：
+>
+> "530 Time_stamp\r\n"
+>
+> "User_id Room_number\r\n"
+>
+> "\r\n"
+>
+> **准备游戏失败 ready_fail**格式：
+>
+> "531 Time_stamp\r\n"
+>
+> "Room_number\r\n"
+>
+> "REASON\r\n"
+>
+> "\r\n"
+>
+> **准备游戏成功 ready_suc**格式：
+>
+> "532 Time_stamp\r\n"
+>
+> "Room_number\r\n"
+>
+> "\r\n"
+
+###### 取消准备
+
+> **取消准备 cancel_ready**格式：
+>
+> "535 Time_stamp\r\n"
+>
+> "User_id Room_number\r\n"
+>
+> "\r\n"
+>
+> **取消准备失败 ready_fail**格式：
+>
+> "536 Time_stamp\r\n"
+>
+> "Room_number\r\n"
+>
+> "REASON\r\n"
+>
+> "\r\n"
+>
+> **取消准备游戏成功 ready_suc**格式：
+>
+> "537 Time_stamp\r\n"
+>
+> "Room_number\r\n"
+>
+> "\r\n"
+
+###### 开始游戏
+
+> **开始游戏**格式：
+>
+> "540 time_stamp\r\n"
+>
+> "User_id room_id\r\n"
+>
+> "\r\n"
+>
+> **开始失败**格式：
+>
+> "541 time_stamp\r\n"
+>
+> "Room_id\r\n"
+>
+> "REASON\r\n"
+>
+> "\r\n"
+>
+> **开始成功**格式：
+>
+> "542 Time_stamp\r\n"
+>
+> "Room_id\r\n"
+>
+> "\r\n"
+
+
+
+###### 退出房间
+
+> **退出房间 leave_room**格式：
+>
+> "545 Time_stamp\r\n"
+>
+> "User_id room_id\r\n"
+>
+> '\r\n'
+>
+> **退出房间失败 leave_room_fail**格式：
+>
+> "546 Time_stamp\r\n"
+>
+> "Room_id\r\n"
+>
+> "REASON\r\n"
+>
+> '\r\n'
+>
+> **退出房间成功 leave_room_suc**格式：
+>
+> "547 Time_stamp\r\n"
+>
+> "Room_id\r\n"
+>
+> '\r\n'
 
 ###### 传输操作
 
@@ -708,9 +728,9 @@ table: relation
 
 **Method Code**：							**Meaning:**
 
-**500**												   **替换卡牌**
+**560**												   **替换卡牌**
 
-510													抽取卡牌
+570													抽取卡牌
 
 520                                                   游戏投降
 
@@ -825,12 +845,20 @@ table: relation
 > "Room_id\r\n"
 >
 > "\r\n"
+>
+> **房主改变 owner_change**格式：
+>
+> "112 Time_stamp\r\n"
+>
+> "Room_id Name\r\n"
+>
+> "\r\n"
 
 ###### 房间状态改变（房主视角）
 
 > **玩家加入房间 player_in**格式：
 >
-> "112 Time_stamp\r\n"
+> "113 Time_stamp\r\n"
 >
 > "Room_id Name\r\n"
 >
@@ -838,7 +866,7 @@ table: relation
 >
 > **玩家退出房间 player_out**格式：
 >
-> "113 Time_stamp\r\n"
+> "114 Time_stamp\r\n"
 >
 > "Room_id\r\n"
 >
@@ -846,7 +874,7 @@ table: relation
 >
 > **玩家准备 player_ready**格式：
 >
-> "114 Time_stamp\r\n"
+> "115 Time_stamp\r\n"
 >
 > "Room_id\r\n"
 >
@@ -854,7 +882,7 @@ table: relation
 >
 > **玩家取消准备 player_not_ready**格式
 >
-> "115 Time_stamp\r\n"
+> "116 Time_stamp\r\n"
 >
 > "Room_id\r\n"
 >

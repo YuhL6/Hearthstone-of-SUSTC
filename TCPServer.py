@@ -17,7 +17,7 @@ rooms = {}
 undetermined_list = {}
 sel = selectors.DefaultSelector()
 conn_db = Conn_to_database.Conn_DB()
-avalable_ids = []
+available_ids = []
 
 
 class Executor:
@@ -55,17 +55,7 @@ class Executor:
                 sel.unregister(conn)
                 conn.close()
                 return
-        if self.resolver.get_method() == 350:
-            self.list_room(conn)
-        elif self.resolver.get_method() == 360:
-            self.create_room(conn)
-        elif self.resolver.get_method() == 370:
-            self.add_into_room(conn)
-        elif self.resolver.get_method() == 380:
-            self.get_ready(conn)
-        elif self.resolver.get_method() == 385:
-            self.cancel_ready(conn)
-        elif self.resolver.get_method() == 400:
+        if self.resolver.get_method() == 400:
             self.request_relation(conn)
         elif self.resolver.get_method() == 410:
             self.accept_relation(conn)
@@ -75,6 +65,18 @@ class Executor:
             self.chat_with(conn)
         elif self.resolver.get_method() == 430:
             self.delete_relation(conn)
+        elif self.resolver.get_method() == 500:
+            self.list_room(conn)
+        elif self.resolver.get_method() == 510:
+            self.create_room(conn)
+        elif self.resolver.get_method() == 520:
+            self.add_into_room(conn)
+        elif self.resolver.get_method() == 530:
+            self.get_ready(conn)
+        elif self.resolver.get_method() == 535:
+            self.cancel_ready(conn)
+        elif self.resolver.get_method() == 545:
+            self.leave_room(conn)
 
     def register(self):
         """in this function, user_id is integer"""
@@ -271,10 +273,10 @@ class Executor:
         if socks[conn].get_status() > 1:
             conn.send(self.generator.create_room_fail("Status error"))
             return
-        if len(avalable_ids) == 0:
+        if len(available_ids) == 0:
             new_id = len(rooms) + 1
         else:
-            new_id = heapq.heappop()
+            new_id = heapq.heappop(available_ids)
         room = Games.Room(new_id, self.resolver.get_id(), socks[conn].get_name())  # no password version
         rooms[new_id] = room
         socks[conn].in_room(new_id)
@@ -298,24 +300,27 @@ class Executor:
                 pass
 
     def add_into_room(self, conn):
+        global room_id
+        global room
         try:
-            rooms[self.resolver.get_room_num()]
+            room_id = self.resolver.get_room_num()
+            room = rooms[room_id]
         except:
-            conn.send(self.generator.add_room_fail(self.resolver.get_room_num(), "No room exists"))
+            conn.send(self.generator.add_room_fail(room_id, "No room exists"))
             return
-        if socks[conn].in_room(self.resolver.get_room_num()) == -1:
-            conn.send(self.generator.add_room_fail(self.resolver.get_room_num(), "Status error"))
-            return
-        res = rooms[self.resolver.get_room_num()].add_player(self.resolver.get_id(), socks[conn].get_name())
+        res = socks[conn].in_room(room_id)
         if res == -1:
-            conn.send(self.generator.add_room_fail(self.resolver.get_room_num(), "Wrong password"))
+            conn.send(self.generator.add_room_fail(room_id, "Status error"))
+            return
+        res = room.add_player(self.resolver.get_id(), socks[conn].get_name())
+        if res == -1:
+            conn.send(self.generator.add_room_fail(room_id, "Wrong password"))
         elif res == -2:
-            conn.send(self.generator.add_room_fail(self.resolver.get_room_num(), "The room is full"))
+            conn.send(self.generator.add_room_fail(room_id, "The room is full"))
         else:
-            conn.send(self.generator.add_room_suc(self.resolver.get_room_num()))
+            conn.send(self.generator.add_room_suc(room_id))
             try:
-                users[rooms[self.resolver.get_room_num()].get_owner()].send(self.generator.player_in(
-                    self.resolver.get_room_num(), socks[conn].get_name()))
+                users[room.get_owner()].send(self.generator.player_in(room_id, socks[conn].get_name()))
             except:
                 # owner is outline
                 pass
@@ -337,23 +342,27 @@ class Executor:
         if socks[conn].get_room() != self.resolver.get_room_num():
             conn.send(self.generator.ready_fail(self.resolver.get_room_num(), "You are ont in the room"))
             return
+        room_id = self.resolver.get_room_num()
+        room = rooms[room_id]
         res = socks[conn].ready()
         if res == -1:
-            conn.send(self.generator.ready_fail(self.resolver.get_room_num(), "Status error: user"))
+            conn.send(self.generator.ready_fail(room_id, "Status error: user"))
             return
-        res = rooms[self.resolver.get_room_num()].ready()
+        res = room.ready()
         if res == -1:
             socks[conn].not_ready()
-            conn.send(self.generator.ready_fail(self.resolver.get_room_num(), "Status error: room"))
+            conn.send(self.generator.ready_fail(room_id, "Status error: room"))
             return
-        conn.send(self.generator.ready_suc(rooms[self.resolver.get_room_num()]))
+        conn.send(self.generator.ready_suc(room_id))
         try:
-            users[rooms[self.resolver.get_room_num()].get_owner].send(self.generator.player_ready(
-                self.resolver.get_room_num()))
+            users[room.get_owner()].send(self.generator.player_ready(room_id))
         except:
             pass
 
     def cancel_ready(self, conn):
+        if socks[conn].get_room() != self.resolver.get_room_num():
+            conn.send(self.generator.ready_fail(self.resolver.get_room_num(), "You are ont in the room"))
+            return
         res = socks[conn].not_ready()
         if res == -1:
             conn.send(self.generator.ready_fail(self.resolver.get_room_num(), "Status error: user"))
@@ -363,23 +372,25 @@ class Executor:
             socks[conn].ready()
             conn.send(self.generator.ready_fail(self.resolver.get_room_num(), "Status error: room"))
             return
+        conn.send(self.generator.cancel_ready_suc(self.resolver.get_room_num()))
         try:
-            users[rooms[self.resolver.get_room_num()].get_owner].send(self.generator.player_not_ready(
+            users[rooms[self.resolver.get_room_num()].get_owner()].send(self.generator.player_not_ready(
                 self.resolver.get_room_num()))
         except:
             pass
 
     def leave_room(self, conn):
         global msg
-        room_id = self.resolver.get_room_num()
-        if socks[conn].get_room != room_id:
+        room_id = int(self.resolver.get_room_num())
+        if socks[conn].get_room() != room_id:
             conn.send(self.generator.leave_room_fail(room_id, "You are not in the room"))
             return
+        room = rooms[room_id]
         res = socks[conn].out_room()
         if res == -1:
             conn.send(self.generator.leave_room_fail(room_id, "Status error: user"))
             return
-        res = rooms[room_id].delete_player(self.resolver.get_id())
+        res = room.delete_player(self.resolver.get_id())
         if res == -1:
             conn.send(self.generator.leave_room_fail(room_id, "Room is gaming"))
             return
@@ -390,17 +401,19 @@ class Executor:
             conn.send(self.generator.leave_room_suc(room_id))
             msg = self.generator.room_empty(room_id)
             try:
-                users[rooms[room_id].get_owner()].send(self.generator.player_out(room_id))
+                users[room.get_owner()].send(self.generator.player_out(room_id))
             except:
                 # owner is outline
                 pass
         elif res == 1:
+            socks[users[room.get_owner()]].ready()
             conn.send(self.generator.leave_room_suc(room_id))
-            msg = self.generator.owner_change(room_id, rooms[room_id].get_owner_name())
+            msg = self.generator.owner_change(room_id, room.get_owner_name())
         elif res == 2:
             conn.send(self.generator.leave_room_suc(self.resolver.get_room_num()))
             msg = self.generator.delete_room(self.resolver.get_room_num())
-            heapq.heappush(avalable_ids, self.resolver.get_room_num())
+            heapq.heappush(available_ids, self.resolver.get_room_num())
+            del rooms[room_id]
         fr_li = socks[conn].get_friend_list()
         for i in fr_li:
             if fr_li[i][1] == 1:
