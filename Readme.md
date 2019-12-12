@@ -584,7 +584,7 @@ table: relation
 >
 > "522 Time_stamp\r\n"
 >
-> "Room_id\r\n"
+> "Room_id Owner_name\r\n"
 >
 > "\r\n"
 
