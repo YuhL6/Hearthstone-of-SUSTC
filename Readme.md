@@ -874,17 +874,15 @@ table: relation
 
 > **投降（用户发送） yield**格式：
 >
-> "610 Time_stamp\r\n"
+> "710 Time_stamp\r\n"
 >
 > "User_id Room_id\r\n"
->
-> "Side\r\n"
 >
 > "\r\n"
 >
 > **投降（服务器发送） yield**格式：
 >
-> "610 Time_stamp\r\n"
+> "710 Time_stamp\r\n"
 >
 > "Side\r\n"
 >
