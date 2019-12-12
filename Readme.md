@@ -703,16 +703,196 @@ table: relation
 > "Room_id\r\n"
 >
 > '\r\n'
+>
+> 
 
-###### 传输操作
+###### 开始游戏
 
-**传输操作**格式：
+> **开始游戏 start_game**格式：
+>
+> "550 Time_stamp\r\n"
+>
+> "User_id Room_id\r\n"
+>
+> "\r\n"
+>
+> **开始失败 start_game_fail**格式：
+>
+> "551 Time_stamp\r\n"
+>
+> "room_id\r\n"
+>
+> "REASON\r\n"
+>
+> "\r\n"
+>
+> **开始成功 start_game_suc**格式：
+>
+> "552 Time_stamp\r\n"
+>
+> "room_id Priority\r\n"
+>
+> "Picture_id\r\n"
+>
+> //0: 4, 1: 3
+>
+> "Card_id\r\n"
+>
+> "\r\n"
 
-"Method_code time_stamp\r\n"
+###### 获取卡牌
 
-"actor_id room_id\r\n"
+> **获取卡牌 get_card**格式：
+>
+> "570 Time_stamp\r\n"
+>
+> "User_id room_id\r\n"
+>
+> "r\n"
+>
+> **获取卡牌失败 get_card_fail**格式：
+>
+> "571 Time_stamp\r\n"
+>
+> "room_id\r\n"
+>
+> "REASON\r\n"
+>
+> "\r\n"
+>
+> **获取卡牌成功 get_card_suc**格式：
+>
+> "572 Time_stamp\r\n"
+>
+> "room_id\r\n"
+>
+> "card_num\r\n"
+>
+> "\r\n"
 
+###### 出牌
 
+> **出牌 put_card**格式：
+>
+> "580 Time_stamp\r\n"
+>
+> "User_id room_id\r\n"
+>
+> "card_num\r\n"
+>
+> "\r\n"
+>
+> **出牌失败 put_card_fail**格式：
+>
+> "581 Time_stamp\r\n"
+>
+> "Room_id\r\n"
+>
+> "REASON\r\n"
+>
+> "\r\n"
+>
+> **出牌（服务器转发） put_card**格式：
+>
+> "582 Time_stamp\r\n"
+>
+> "Card_id\r\n"
+>
+> "\r\n"
+
+###### 攻击
+
+> **攻击 attack**格式：
+>
+> "590 Time_stamp\r\n"
+>
+> "User_id Room_id\r\n"
+>
+> "attacker_card injured_card\r\n"
+>
+> "\r\n"
+>
+> **攻击失败 attack_fail**格式：
+>
+> "591 Time_stamp\r\n"
+>
+> "Room_id\r\n"
+>
+> "REASON\r\n"
+>
+> "\r\n"
+>
+> **攻击（服务器转发） attack**格式：
+>
+> "592 Time_stamp\r\n"
+>
+> "attacker_card injured_card\r\n"
+>
+> "\r\n"
+
+###### 结束回合
+
+> **结束回合（用户发送） round_end**格式：
+>
+> "600 Time_stamp\r\n"
+>
+> "User_id Room_id\r\n"
+>
+> "Side"			// 0 stands for first hand, 1 stands for last hand
+>
+> "\r\n"
+>
+> **结束失败 round_end_fail**格式：
+>
+> "601 Time_stamp\r\n"
+>
+> "Room_id\r\n"
+>
+> "REASON\r\n"
+>
+> "\r\n"
+>
+> **结束回合（服务器发送) round_end**格式：
+>
+> "602 Time_stamp\r\n"
+>
+> "Side"			// 0 stands for first hand, 1 stands for last hand
+>
+> "\r\n"
+
+###### 结束游戏
+
+> **游戏结束（服务器发送） game over**格式：
+>
+> "610 Time_stamp\r\n"
+>
+> "Side\r\n"
+>
+> "\r\n"
+
+###### 投降
+
+> **投降（用户发送） yield**格式：
+>
+> "610 Time_stamp\r\n"
+>
+> "User_id Room_id\r\n"
+>
+> "Side\r\n"
+>
+> "\r\n"
+>
+> **投降（服务器发送） yield**格式：
+>
+> "610 Time_stamp\r\n"
+>
+> "Side\r\n"
+>
+> "\r\n"
+
+620
+
+chat
 
 ###### 游戏交流
 
