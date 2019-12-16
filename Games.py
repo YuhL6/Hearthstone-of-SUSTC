@@ -1,4 +1,5 @@
 import random
+import Server
 
 
 class card:
@@ -15,7 +16,7 @@ max_room_num = 0
 
 
 class Player:
-    def __init__(self, id, socket, time, li, res):
+    def __init__(self, id, socket, name, time):
         """
         user log in, change the status stored in the database and get information from database
         inform all the friends, use the method broadcast of TCP server
@@ -26,12 +27,10 @@ class Player:
         # status 1 means online, 2 means in room, 3 means ready, 4 means gaming
         self._status = 1
         self.socket = socket
-        self._friends_list = res
+        self._name = name
+        self._friends_list = []
         self._room = -1
         self.last_time = time
-        self._name = li[0]
-        self._total_game_num = li[1]
-        self._win_rate = li[2]
 
     def get_room(self):
         return self._room
@@ -43,141 +42,71 @@ class Player:
         return self._status
 
     def get_name(self):
-        return self._name
+        return self._status
 
-    def get_friend_list(self):
-        return self._friends_list
-
-    def friend_online(self, name):
-        self._friends_list[name][1] = 1
-
-    def friend_outline(self, name):
-        self._friends_list[name][1] = 0
-
-    def friend_in_room(self, name):
-        self._friends_list[name][1] = 2
-
-    def friend_in_game(self, name):
-        self._friends_list[name][1] = 3
-
-    def friend_out_game(self, name):
-        self._friends_list[name][1] = 2
-
-    def friend_out_room(self, name):
-        self._friends_list[name][1] = 1
-
-    def add_friend(self, name):
-        self._friends_list[name] = ['', 1]
-
-    def delete_friend(self, name):
-        del self._friends_list[name]
-
-    def in_room(self, room_id):
-        if self._status >= 2:
-            return -1
-        self._status = 2
-        self._room = room_id
-        return 0
-
-    def out_room(self):
-        if self._status != 2 and self._status != 3:
-            return -1
-        self._status = 1
-        return 0
-
-    def ready(self):
-        if self._status != 2:
-            return -1
+    def ready(self, server: Server.TCPServer):
         self._status = 3
-        return 0
+        server.broadcast(self._friends_list, b'')
 
-    def not_ready(self):
-        if self._status != 3:
-            return -1
+    def in_room(self, server: Server.TCPServer):
         self._status = 2
-        return 0
+        server.broadcast(self._friends_list, b'')
+
+    def out_room(self, server: Server.TCPServer):
+        self._status = 1
+        server.broadcast(self._friends_list, b'')
+
+    def start_game(self, server: Server.TCPServer):
+        self._status = 4
+        server.broadcast(self._friends_list, b'')
 
 
 class Room:
-    def __init__(self, id, owner_id, owner_name, password=None):
+    def __init__(self, id, owner: Player, server, password=None):
         """
         status: 0 means empty, 1 means full, 2 means ready, 3 means gaming
         if the owner set password, any one who wants to add into the room needs to enter the password
 
         """
-        self._id = id
-        self._owner = owner_id
-        self._owner_name = owner_name
-        self._attacker = -1
-        self._attacker_name = ''
+        self.id = id
+        self.owner = owner
+        self.owner.ready(server)
+        self.player = None
         self.field = None
-        self._status = 0
-        self._password = password
-
-    def get_id(self):
-        return self._id
-
-    def get_owner(self):
-        return self._owner
-
-    def get_owner_name(self):
-        return self._owner_name
-
-    def get_attacker(self):
-        return self._attacker
-
-    def get_status(self):
-        return self._status
+        self.status = 0
+        self.password = password
 
     def start_game(self):
-        if self._status != 2:
+        if self.status != 2:
             # not ready
             return -1
         self.field = Field()
-        self._status = 3
+        self.status = 3
         return 0
 
-    def add_player(self, player, player_name, password=None):
-        if self._password != password:
+    def add_player(self, player: Player, password=None):
+        if self.password != password:
             return -1
-        if self._status != 0:
-            return -2
-        self._attacker = player
-        self._attacker_name = player_name
-        self._status = 1
+        self.player = player
+        self.status = 1
         return 0
 
     def ready(self):
-        if self._status != 1:
+        if self.status != 1:
             return -1
-        self._status = 2
+        self.status = 2
+        self.player.ready()
         return 0
 
-    def not_ready(self):
-        if self._status != 2:
+    def delete_player(self):
+        if self.status == 3:
+            # invalid operation
+            return -2
+        if self.status >= 1:
+            # empty room
             return -1
-        self._status = 1
-        return 0
-
-    def delete_player(self, player):
-        if self._status == 3:
-            # Room is gaming
-            return -1
-        if player == self._attacker and self._status != 0:
-            self._status = 0
-            return 0
-        if player == self._owner:
-            if self._status == 1 or self._status == 2:
-                self._owner = self._attacker
-                self._owner_name = self._attacker_name
-                self._status = 0
-                # owner is changed
-                return 1
-            else:
-                # room is deleted
-                return 2
-
-
+        self.player = None
+        self.status = 0
 
     def change_owner(self):
         if self.status < 1:
@@ -187,7 +116,7 @@ class Room:
         self.player = tmp
         self.player.ready()
 
-    '''def delete_room(self, server):
+    def delete_room(self, server):
         self.owner.out_room(server)
         if self.status >= 1:
             self.player.out_room(server)
@@ -207,7 +136,7 @@ class Room:
     def end_game(self, server):
         self.field = None
         self.owner.in_room(server)
-        self.player.in_room(server)'''
+        self.player.in_room(server)
 
 
 class Field:
@@ -255,5 +184,5 @@ class Field:
         else:
             self.attacker_money += 1
 
-    '''def game_over(self, room: Room, server):
-        room.end_game(server)'''
+    def game_over(self, room: Room, server):
+        room.end_game(server)
