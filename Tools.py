@@ -28,10 +28,7 @@ class Resolver:
 
     def get_password(self):
         """valid when log, register and change password"""
-        try:
-            return self.data[1].split(' ')[1]
-        except:
-            return None
+        return self.data[1].split(' ')[1]
 
     def get_user_name(self):
         """only valid in register"""
@@ -53,68 +50,47 @@ class Resolver:
 
     def get_new_password(self):
         """only change password"""
-        try:
-            return self.data[2]
-        except:
-            return None
+        return self.data[2]
 
     def get_list_name(self):
-        try:
-            return self.data[1].split(' ')[1]
-        except:
-            return None
+        return self.data[1].split(' ')[1]
 
     def get_card_name(self):
-        try:
-            return int(self.data[2])
-        except:
-            return None
+        return int(self.data[2])
 
     def get_room_num(self):
-        try:
-            return int(self.data[1].split(' ')[1])
-        except:
-            return None
+        return int(self.data[1].split(' ')[1])
 
     def get_receiver(self):
         """valid in friend system
         friend system includes: request, accept, refuse, send message, delete"""
-        try:
-            return self.data[1].split(' ')[1]
-        except:
-            return None
+        return self.data[1].split(' ')[1]
 
     def get_sender(self):
         """friend system"""
-        try:
-            return self.data[1].split(' ')[1]
-        except:
-            return None
+        return self.data[1].split(' ')[1]
 
     def get_delete_name(self):
-        try:
-            return self.data[1].split(' ')[1]
-        except:
-            return None
+        return self.data[1].split(' ')[1]
 
     def get_delete_num(self):
-        try:
-            return self.data[1].split(' ')[1]
-        except:
-            return None
-
-    def get_room_num(self):
-        try:
-            return int(self.data[1].split(' ')[1])
-        except:
-            return None
+        return self.data[1].split(' ')[1]
 
     def get_message(self):
         """only in send message"""
-        try:
-            return self.data[2]
-        except:
-            return None
+        return self.data[2]
+
+    def get_card(self):
+        return int(self.data[2])
+
+    def get_attack(self):
+        return int(self.data[2].split(' ')[0])
+
+    def get_injured(self):
+        return int(self.data[2].split(' ')[1])
+
+    def get_side(self):
+        return int(self.data[2])
 
 
 class Generator:
@@ -348,15 +324,15 @@ class Generator:
         str = '512 {}\r\n{}\r\n\r\n'.format(time.time(), room_id)
         return str.encode()
 
-    def add_room_fail(self, room_id, reason):
+    def add_room_fail(self, reason):
         str = '521 {}\r\n'.format(time.time())
         str += '{} {}\r\n'.format(room_id, reason)
         str += '\r\n'
         return str.encode()
 
-    def add_room_suc(self, room_id):
+    def add_room_suc(self, room_id, owner_name):
         str = '522 {}\r\n'.format(time.time())
-        str += '{}\r\n'.format(room_id)
+        str += '{} {}\r\n'.format(room_id, owner_name)
         str += '\r\n'
         return str.encode()
 
@@ -388,4 +364,50 @@ class Generator:
     def leave_room_suc(self, room_id):
         str = "547 {}\r\n".format(time.time())
         str += "{}\r\n\r\n".format(room_id)
+        return str.encode()
+
+    def start_game_fail(self, room_id,reason):
+        str = "551 {}\r\n".format(time.time())
+        str += "{}\r\n{}\r\n\r\n".format(room_id, reason)
+        return str.encode()
+
+    def start_game_suc(self, room_id, priority, li: list):
+        str = "552 {}\r\n".format(time.time())
+        str += "{} {}\r\n".format(room_id, priority)
+        str += "Defaultuser0\r\n"
+        str += "Defaultuser1\r\n"
+        print(li)
+        for i in li:
+            str += "{}\r\n".format(i)
+        str += "\r\n"
+        print(str)
+        return str.encode()
+
+    def msg_in_room(self, room_id, msg):
+        str = "570 {}\r\n".format(time.time())
+        str += "{}\r\n{}\r\n\r\n".format(room_id, msg)
+        return str.encode()
+
+    def put_card_fail(self, room_id, reason):
+        str = "581 {}\r\n".format(time.time())
+        str += "{}\r\n{}\r\n\r\n".format(room_id, reason)
+        return str.encode()
+
+    def put_card_suc(self, card_id):
+        str = "582 {}\r\n".format(time.time())
+        str += "{}\r\n\r\n".format(card_id)
+        return str.encode()
+
+    def attack(self, a, b):
+        str = "592 {}\r\n".format(time.time())
+        str += "{} {}\r\n\r\n".format(a, b)
+        return str.encode()
+
+    def game_over(self, side):
+        str = "610 {}\r\n".format(time.time())
+        str += "{}\r\n\r\n".format(side)
+        return str.encode()
+
+    def round_over(self):
+        str = "602 {}\r\n\r\n".format(time.time())
         return str.encode()
